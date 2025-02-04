@@ -1,11 +1,10 @@
-import { useContext } from "react";
 import { AuthToken, User, FakeData } from "tweeter-shared";
-import { UserInfoContext } from "../userInfo/UserInfoProvider";
 import useToastListener from "../toaster/ToastListenerHook";
+import useUserInfo from "../userInfo/userInfoHook";
 
 const useNavigateToUser = () => {
     const { displayErrorMessage } = useToastListener();
-    const { setDisplayedUser, currentUser, authToken } = useContext(UserInfoContext);
+    const { setDisplayedUser, currentUser, authToken } = useUserInfo();
     
     const extractAlias = (value: string): string => {
         const index = value.indexOf("@");

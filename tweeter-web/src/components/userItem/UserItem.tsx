@@ -1,8 +1,5 @@
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { User } from "tweeter-shared";
 import { Link } from "react-router-dom";
-import { UserInfoContext } from "../userInfo/UserInfoProvider";
-import { useContext } from "react";
-import useToastListener from "../toaster/ToastListenerHook";
 import useNavigateToUser from "./userNavigationHook";
 
 interface Props {
