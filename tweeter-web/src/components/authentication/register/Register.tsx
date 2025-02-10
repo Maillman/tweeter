@@ -1,15 +1,22 @@
 import "./Register.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { ChangeEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { ChangeEvent, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, FakeData, User } from "tweeter-shared";
 import { Buffer } from "buffer";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationFields from "../AuthenticationFields";
 import useUserInfo from "../../userInfo/userInfoHook";
+import {
+  RegisterPresenter,
+  RegisterView,
+} from "../../../presenters/RegisterPresenter";
 
-const Register = () => {
+interface Props {
+  presenterGenerator: (view: RegisterView) => RegisterPresenter;
+}
+
+const Register = (props: Props) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [alias, setAlias] = useState("");
@@ -20,26 +27,37 @@ const Register = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate();
   const { updateUserInfo } = useUserInfo();
   const { displayErrorMessage } = useToastListener();
 
-  const checkSubmitButtonStatus = (): boolean => {
-    return (
-      !firstName ||
-      !lastName ||
-      !alias ||
-      !password ||
-      !imageUrl ||
-      !imageFileExtension
-    );
+  const listener: RegisterView = {
+    firstName: firstName,
+    lastName: lastName,
+    alias: alias,
+    password: password,
+    imageUrl: imageUrl,
+    imageBytes: imageBytes,
+    imageFileExtension: imageFileExtension,
+    rememberMe: rememberMe,
+    setIsLoading: setIsLoading,
+    updateUserInfo: updateUserInfo,
+    displayErrorMessage: displayErrorMessage,
   };
 
-  const registerOnEnter = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key == "Enter" && !checkSubmitButtonStatus()) {
-      doRegister();
-    }
-  };
+  const [presenter] = useState(props.presenterGenerator(listener));
+
+  useEffect(() => {
+    presenter.updateView(listener);
+  }, [
+    firstName,
+    lastName,
+    alias,
+    password,
+    rememberMe,
+    imageUrl,
+    imageBytes,
+    imageFileExtension,
+  ]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -82,52 +100,6 @@ const Register = () => {
     return file.name.split(".").pop();
   };
 
-  const doRegister = async () => {
-    try {
-      setIsLoading(true);
-
-      const [user, authToken] = await register(
-        firstName,
-        lastName,
-        alias,
-        password,
-        imageBytes,
-        imageFileExtension
-      );
-
-      updateUserInfo(user, user, authToken, rememberMe);
-      navigate("/");
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to register user because of exception: ${error}`
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (
-    firstName: string,
-    lastName: string,
-    alias: string,
-    password: string,
-    userImageBytes: Uint8Array,
-    imageFileExtension: string
-  ): Promise<[User, AuthToken]> => {
-    // Not neded now, but will be needed when you make the request to the server in milestone 3
-    const imageStringBase64: string =
-      Buffer.from(userImageBytes).toString("base64");
-
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
-
-    if (user === null) {
-      throw new Error("Invalid registration");
-    }
-
-    return [user, FakeData.instance.authToken];
-  };
-
   const inputFieldGenerator = () => {
     return (
       <>
@@ -138,7 +110,9 @@ const Register = () => {
             size={50}
             id="firstNameInput"
             placeholder="First Name"
-            onKeyDown={registerOnEnter}
+            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
+              presenter.registerOnEnter(event)
+            }
             onChange={(event) => setFirstName(event.target.value)}
           />
           <label htmlFor="firstNameInput">First Name</label>
@@ -150,13 +124,17 @@ const Register = () => {
             size={50}
             id="lastNameInput"
             placeholder="Last Name"
-            onKeyDown={registerOnEnter}
+            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
+              presenter.registerOnEnter(event)
+            }
             onChange={(event) => setLastName(event.target.value)}
           />
           <label htmlFor="lastNameInput">Last Name</label>
         </div>
         <AuthenticationFields
-          onKeyPress={registerOnEnter}
+          onKeyPress={(event: React.KeyboardEvent<HTMLElement>) =>
+            presenter.registerOnEnter(event)
+          }
           alias={alias}
           setAlias={setAlias}
           password={password}
@@ -167,7 +145,9 @@ const Register = () => {
             type="file"
             className="d-inline-block py-5 px-4 form-control bottom"
             id="imageFileInput"
-            onKeyDown={registerOnEnter}
+            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
+              presenter.registerOnEnter(event)
+            }
             onChange={handleFileChange}
           />
           <label htmlFor="imageFileInput">User Image</label>
@@ -193,9 +173,9 @@ const Register = () => {
       inputFieldGenerator={inputFieldGenerator}
       switchAuthenticationMethodGenerator={switchAuthenticationMethodGenerator}
       setRememberMe={setRememberMe}
-      submitButtonDisabled={checkSubmitButtonStatus}
+      submitButtonDisabled={() => presenter.checkSubmitButtonStatus()}
       isLoading={isLoading}
-      submit={doRegister}
+      submit={() => presenter.doRegister()}
     />
   );
 };
