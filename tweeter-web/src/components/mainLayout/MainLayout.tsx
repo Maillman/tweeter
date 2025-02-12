@@ -11,6 +11,10 @@ import {
   AppNavbarPresenter,
   AppNavbarView,
 } from "../../presenters/AppNavbarPresenter";
+import {
+  PostStatusPresenter,
+  PostStatusView,
+} from "../../presenters/PostStatusPresenter";
 
 const MainLayout = () => {
   return (
@@ -32,7 +36,11 @@ const MainLayout = () => {
                 />
               </div>
               <div className="p-3 border mt-1 rounded bg-light">
-                <PostStatus />
+                <PostStatus
+                  presenterGenerator={(view: PostStatusView) =>
+                    new PostStatusPresenter(view)
+                  }
+                />
               </div>
             </div>
           </div>
