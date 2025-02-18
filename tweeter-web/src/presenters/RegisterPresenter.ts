@@ -3,8 +3,9 @@ import { UserService } from "../model/service/UserService";
 import { useNavigate } from "react-router-dom";
 import { ChangeEvent } from "react";
 import { Buffer } from "buffer";
+import { Presenter, View } from "./Presenter";
 
-export interface RegisterView {
+export interface RegisterView extends View {
     firstName: string
     lastName: string
     alias: string
@@ -18,12 +19,10 @@ export interface RegisterView {
     setImageFileExtension: (isImageFileExtension: string) => void
     setImageBytes: (isImageBytes: Uint8Array) => void
     updateUserInfo: (currentUser: User, displayedUser: User | null, authToken: AuthToken, remember: boolean) => void
-    displayErrorMessage: (message: string) => void
 }
 
-export class RegisterPresenter {
+export class RegisterPresenter extends Presenter<RegisterView> {
     private userService: UserService;
-    private view: RegisterView;
 
     private navigate = useNavigate();
 
@@ -32,7 +31,7 @@ export class RegisterPresenter {
     }
 
     public constructor(view: RegisterView){
-        this.view = view;
+        super(view);
         this.userService = new UserService;
     }
 
@@ -54,8 +53,8 @@ export class RegisterPresenter {
       };
 
     public async doRegister() {
-        try {
-          this.view.setIsLoading(true);
+      this.doFailureReportingOperation(async () => {
+        this.view.setIsLoading(true);
     
           const [user, authToken] = await this.userService.register(
             this.view.firstName,
@@ -68,14 +67,9 @@ export class RegisterPresenter {
     
           this.view.updateUserInfo(user, user, authToken, this.view.rememberMe);
           this.navigate("/");
-        } catch (error) {
-          this.view.displayErrorMessage(
-            `Failed to register user because of exception: ${error}`
-          );
-        } finally {
-          this.view.setIsLoading(false);
-        }
-      };
+      }, "register user");
+      this.view.setIsLoading(false);
+    };
 
       public handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

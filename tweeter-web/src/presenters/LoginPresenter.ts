@@ -1,25 +1,24 @@
 import { User, AuthToken } from "tweeter-shared";
 import { UserService } from "../model/service/UserService";
 import { useNavigate } from "react-router-dom";
+import { Presenter, View } from "./Presenter";
 
-export interface LoginView {
+export interface LoginView extends View {
     originalUrl?: string;
     alias: string
     password: string
     rememberMe: boolean
     setIsLoading: (isLoading: boolean) => void
     updateUserInfo: (currentUser: User, displayedUser: User | null, authToken: AuthToken, remember: boolean) => void
-    displayErrorMessage: (message: string) => void
 }
 
-export class LoginPresenter {
+export class LoginPresenter extends Presenter<LoginView> {
     private userService: UserService;
-    private view: LoginView;
 
     private navigate = useNavigate();
 
     public constructor(view: LoginView){
-        this.view = view;
+        super(view);
         this.userService = new UserService;
     }
 
@@ -38,8 +37,8 @@ export class LoginPresenter {
       };
 
     public async doLogin() {
-        try {
-          this.view.setIsLoading(true);
+      this.doFailureReportingOperation(async () => {
+        this.view.setIsLoading(true);
     
           const [user, authToken] = await this.userService.login(this.view.alias, this.view.password);
     
@@ -50,12 +49,7 @@ export class LoginPresenter {
           } else {
             this.navigate("/");
           }
-        } catch (error) {
-          this.view.displayErrorMessage(
-            `Failed to log user in because of exception: ${error}`
-          );
-        } finally {
-          this.view.setIsLoading(false);
-        }
-      };
+      }, "log user in");
+      this.view.setIsLoading(false);
+    };
 }
