@@ -72,7 +72,7 @@ const Register = (props: Props) => {
             id="firstNameInput"
             placeholder="First Name"
             onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
-              presenter.registerOnEnter(event)
+              presenter.authenticateOnEnter(event)
             }
             onChange={(event) => setFirstName(event.target.value)}
           />
@@ -86,7 +86,7 @@ const Register = (props: Props) => {
             id="lastNameInput"
             placeholder="Last Name"
             onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
-              presenter.registerOnEnter(event)
+              presenter.authenticateOnEnter(event)
             }
             onChange={(event) => setLastName(event.target.value)}
           />
@@ -94,7 +94,7 @@ const Register = (props: Props) => {
         </div>
         <AuthenticationFields
           onKeyPress={(event: React.KeyboardEvent<HTMLElement>) =>
-            presenter.registerOnEnter(event)
+            presenter.authenticateOnEnter(event)
           }
           alias={alias}
           setAlias={setAlias}
@@ -107,7 +107,7 @@ const Register = (props: Props) => {
             className="d-inline-block py-5 px-4 form-control bottom"
             id="imageFileInput"
             onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
-              presenter.registerOnEnter(event)
+              presenter.authenticateOnEnter(event)
             }
             onChange={presenter.handleFileChange}
           />
@@ -136,7 +136,7 @@ const Register = (props: Props) => {
       setRememberMe={setRememberMe}
       submitButtonDisabled={() => presenter.checkSubmitButtonStatus()}
       isLoading={isLoading}
-      submit={() => presenter.doRegister()}
+      submit={() => presenter.doAuthentication()}
     />
   );
 };

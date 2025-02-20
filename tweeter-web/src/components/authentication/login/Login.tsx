@@ -42,7 +42,7 @@ const Login = (props: Props) => {
     return (
       <AuthenticationFields
         onKeyPress={(event: React.KeyboardEvent<HTMLElement>) =>
-          presenter.loginOnEnter(event)
+          presenter.authenticateOnEnter(event)
         }
         alias={alias}
         setAlias={setAlias}
@@ -70,7 +70,7 @@ const Login = (props: Props) => {
       setRememberMe={setRememberMe}
       submitButtonDisabled={() => presenter.checkSubmitButtonStatus()}
       isLoading={isLoading}
-      submit={() => presenter.doLogin()}
+      submit={() => presenter.doAuthentication()}
     />
   );
 };
