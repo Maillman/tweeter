@@ -68,9 +68,9 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
           this.view.setIsFollower(true);
           this.view.setFollowerCount(followerCount);
           this.view.setFolloweeCount(followeeCount);
+          this.view.clearLastInfoMessage();
+          this.view.setIsLoading(false);
         }, "follow user");
-        this.view.clearLastInfoMessage();
-        this.view.setIsLoading(false);
       };
 
       public async unfollowDisplayedUser( displayedUser: User, authToken: AuthToken,
@@ -90,8 +90,8 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
           this.view.setIsFollower(false);
           this.view.setFollowerCount(followerCount);
           this.view.setFolloweeCount(followeeCount);
-        }, "unfollow user");
-        this.view.clearLastInfoMessage();
+          this.view.clearLastInfoMessage();
           this.view.setIsLoading(false);
+        }, "unfollow user");
       };
 }

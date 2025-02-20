@@ -28,13 +28,13 @@ export class PostStatusPresenter extends Presenter<PostStatusView> {
           this.view.displayInfoMessage("Posting status...", 0);
     
           const status = new Status(post, currentUser!, Date.now());
-    
+          console.log("testing");
           await this.statusService.postStatus(authToken!, status);
     
           this.view.setPost("");
           this.view.displayInfoMessage("Status posted!", 2000);
+          this.view.clearLastInfoMessage();
+          this.view.setIsLoading(false);
         }, "post the status");
-        this.view.clearLastInfoMessage();
-        this.view.setIsLoading(false);
       };
 }
