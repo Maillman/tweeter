@@ -1,24 +1,25 @@
-import { Status } from "tweeter-shared";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useToastListener from "../toaster/ToastListenerHook";
-import StatusItem from "../statusItem/StatusItem";
 import useUserInfo from "../userInfo/userInfoHook";
 import {
-  StatusItemPresenter,
-  StatusItemView,
-} from "../../presenters/StatusItemPresenter";
+  PagedItemPresenter,
+  PagedItemView,
+} from "../../presenters/PagedItemPresenter";
 
 export const PAGE_SIZE = 10;
 
-interface Props {
-  presenterGenerator: (view: StatusItemView) => StatusItemPresenter;
+interface Props<T, U, V extends PagedItemView<T>> {
+  presenterGenerator: (view: PagedItemView<T>) => PagedItemPresenter<T, U, V>;
+  itemComponentGenerator: (item: T) => JSX.Element;
 }
 
-const StatusItemScroller = (props: Props) => {
+const ItemScroller = <T, U, V extends PagedItemView<T>>(
+  props: Props<T, U, V>
+) => {
   const { displayErrorMessage } = useToastListener();
-  const [items, setItems] = useState<Status[]>([]);
-  const [newItems, setNewItems] = useState<Status[]>([]);
+  const [items, setItems] = useState<T[]>([]);
+  const [newItems, setNewItems] = useState<T[]>([]);
   const [changedDisplayedUser, setChangedDisplayedUser] = useState(true);
 
   const { displayedUser, authToken } = useUserInfo();
@@ -49,10 +50,10 @@ const StatusItemScroller = (props: Props) => {
     presenter.reset();
   };
 
-  const listener: StatusItemView = {
-    addItems: (newItems: Status[]) => setNewItems(newItems),
+  const listener: V = {
+    addItems: (newItems: T[]) => setNewItems(newItems),
     displayErrorMessage: displayErrorMessage,
-  };
+  } as V;
 
   const [presenter] = useState(props.presenterGenerator(listener));
 
@@ -75,7 +76,7 @@ const StatusItemScroller = (props: Props) => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-            <StatusItem status={item} />
+            {props.itemComponentGenerator(item)}
           </div>
         ))}
       </InfiniteScroll>
@@ -83,4 +84,4 @@ const StatusItemScroller = (props: Props) => {
   );
 };
 
-export default StatusItemScroller;
+export default ItemScroller;
