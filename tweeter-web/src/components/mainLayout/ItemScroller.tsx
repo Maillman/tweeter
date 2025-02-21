@@ -9,14 +9,12 @@ import {
 
 export const PAGE_SIZE = 10;
 
-interface Props<T, U, V extends PagedItemView<T>> {
-  presenterGenerator: (view: PagedItemView<T>) => PagedItemPresenter<T, U, V>;
+interface Props<T, U> {
+  presenterGenerator: (view: PagedItemView<T>) => PagedItemPresenter<T, U>;
   itemComponentGenerator: (item: T) => JSX.Element;
 }
 
-const ItemScroller = <T, U, V extends PagedItemView<T>>(
-  props: Props<T, U, V>
-) => {
+const ItemScroller = <T, U>(props: Props<T, U>) => {
   const { displayErrorMessage } = useToastListener();
   const [items, setItems] = useState<T[]>([]);
   const [newItems, setNewItems] = useState<T[]>([]);
@@ -50,10 +48,10 @@ const ItemScroller = <T, U, V extends PagedItemView<T>>(
     presenter.reset();
   };
 
-  const listener: V = {
+  const listener: PagedItemView<T> = {
     addItems: (newItems: T[]) => setNewItems(newItems),
     displayErrorMessage: displayErrorMessage,
-  } as V;
+  };
 
   const [presenter] = useState(props.presenterGenerator(listener));
 
