@@ -14,27 +14,27 @@ export interface RegisterView extends AuthView {
 }
 
 export class RegisterPresenter extends AuthPresenter<RegisterView> {
-    public checkSubmitButtonStatus(): boolean {
+    public checkSubmitButtonStatus(alias: string, password: string): boolean {
         return (
           !this.view.firstName ||
           !this.view.lastName ||
-          !this.view.alias ||
-          !this.view.password ||
+          !alias ||
+          !password ||
           !this.view.imageUrl ||
           !this.view.imageFileExtension
         );
       };
-    public doAuthentication(): Promise<void> {
+    public doAuthentication(alias: string, password: string, rememberMe: boolean): Promise<void> {
       return this.doAuthenticationOperation(async () => {
         return await this.userService.register(
           this.view.firstName,
           this.view.lastName,
-          this.view.alias,
-          this.view.password,
+          alias,
+          password,
           this.view.imageBytes,
           this.view.imageFileExtension
         );
-      }, "register user");
+      }, "register user", rememberMe);
     }
     protected doNavigation(): void {
       this.navigate("/");

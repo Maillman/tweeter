@@ -23,10 +23,6 @@ const Login = (props: Props) => {
   const { displayErrorMessage } = useToastListener();
 
   const listener: LoginView = {
-    originalUrl: props.originalUrl,
-    alias: alias,
-    password: password,
-    rememberMe: rememberMe,
     setIsLoading: setIsLoading,
     updateUserInfo: updateUserInfo,
     displayErrorMessage: displayErrorMessage,
@@ -42,7 +38,7 @@ const Login = (props: Props) => {
     return (
       <AuthenticationFields
         onKeyPress={(event: React.KeyboardEvent<HTMLElement>) =>
-          presenter.authenticateOnEnter(event)
+          presenter.authenticateOnEnter(event, alias, password, rememberMe)
         }
         alias={alias}
         setAlias={setAlias}
@@ -68,9 +64,11 @@ const Login = (props: Props) => {
       inputFieldGenerator={inputFieldGenerator}
       switchAuthenticationMethodGenerator={switchAuthenticationMethodGenerator}
       setRememberMe={setRememberMe}
-      submitButtonDisabled={() => presenter.checkSubmitButtonStatus()}
+      submitButtonDisabled={() =>
+        presenter.checkSubmitButtonStatus(alias, password)
+      }
       isLoading={isLoading}
-      submit={() => presenter.doAuthentication()}
+      submit={() => presenter.doAuthentication(alias, password, rememberMe)}
     />
   );
 };

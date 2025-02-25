@@ -32,12 +32,9 @@ const Register = (props: Props) => {
   const listener: RegisterView = {
     firstName: firstName,
     lastName: lastName,
-    alias: alias,
-    password: password,
     imageUrl: imageUrl,
     imageBytes: imageBytes,
     imageFileExtension: imageFileExtension,
-    rememberMe: rememberMe,
     setIsLoading: setIsLoading,
     setImageUrl: setImageUrl,
     setImageFileExtension: setImageFileExtension,
@@ -72,7 +69,7 @@ const Register = (props: Props) => {
             id="firstNameInput"
             placeholder="First Name"
             onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
-              presenter.authenticateOnEnter(event)
+              presenter.authenticateOnEnter(event, alias, password, rememberMe)
             }
             onChange={(event) => setFirstName(event.target.value)}
           />
@@ -86,7 +83,7 @@ const Register = (props: Props) => {
             id="lastNameInput"
             placeholder="Last Name"
             onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
-              presenter.authenticateOnEnter(event)
+              presenter.authenticateOnEnter(event, alias, password, rememberMe)
             }
             onChange={(event) => setLastName(event.target.value)}
           />
@@ -94,7 +91,7 @@ const Register = (props: Props) => {
         </div>
         <AuthenticationFields
           onKeyPress={(event: React.KeyboardEvent<HTMLElement>) =>
-            presenter.authenticateOnEnter(event)
+            presenter.authenticateOnEnter(event, alias, password, rememberMe)
           }
           alias={alias}
           setAlias={setAlias}
@@ -107,7 +104,7 @@ const Register = (props: Props) => {
             className="d-inline-block py-5 px-4 form-control bottom"
             id="imageFileInput"
             onKeyDown={(event: React.KeyboardEvent<HTMLElement>) =>
-              presenter.authenticateOnEnter(event)
+              presenter.authenticateOnEnter(event, alias, password, rememberMe)
             }
             onChange={presenter.handleFileChange}
           />
@@ -134,9 +131,11 @@ const Register = (props: Props) => {
       inputFieldGenerator={inputFieldGenerator}
       switchAuthenticationMethodGenerator={switchAuthenticationMethodGenerator}
       setRememberMe={setRememberMe}
-      submitButtonDisabled={() => presenter.checkSubmitButtonStatus()}
+      submitButtonDisabled={() =>
+        presenter.checkSubmitButtonStatus(alias, password)
+      }
       isLoading={isLoading}
-      submit={() => presenter.doAuthentication()}
+      submit={() => presenter.doAuthentication(alias, password, rememberMe)}
     />
   );
 };

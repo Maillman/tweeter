@@ -4,9 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { UserService } from "../model/service/UserService";
 
 export interface AuthView extends View {
-    alias: string
-    password: string
-    rememberMe: boolean
     setIsLoading: (isLoading: boolean) => void
     updateUserInfo: (currentUser: User, displayedUser: User | null, authToken: AuthToken, remember: boolean) => void
 }
@@ -33,23 +30,23 @@ export abstract class AuthPresenter<V extends AuthView> extends Presenter<V> {
         this.view = view;
     }
 
-    protected abstract checkSubmitButtonStatus(): boolean;
+    protected abstract checkSubmitButtonStatus(alias: string, password: string): boolean;
 
-    public authenticateOnEnter(event: React.KeyboardEvent<HTMLElement>) {
-        if (event.key == "Enter" && !this.checkSubmitButtonStatus()) {
-          this.doAuthentication();
+    public authenticateOnEnter(event: React.KeyboardEvent<HTMLElement>, alias: string, password: string, rememberMe: boolean) {
+        if (event.key == "Enter" && !this.checkSubmitButtonStatus(alias, password)) {
+          this.doAuthentication(alias, password, rememberMe);
         }
     }
 
-    protected abstract doAuthentication(): Promise<void>;
+    protected abstract doAuthentication(alias: string, password: string, rememberMe: boolean): Promise<void>;
 
     protected abstract doNavigation(): void;
 
-    protected async doAuthenticationOperation(operation: () => Promise<[User, AuthToken]>, itemDescription: string) {
+    protected async doAuthenticationOperation(operation: () => Promise<[User, AuthToken]>, itemDescription: string, rememberMe: boolean) {
         this.doFailureReportingOperation(async () => {
             this.view.setIsLoading(true);
             const [user, authToken] = await operation();
-            this.view.updateUserInfo(user, user, authToken, this.view.rememberMe);
+            this.view.updateUserInfo(user, user, authToken, rememberMe);
             this.doNavigation();
         }, itemDescription);
         this.view.setIsLoading(false);

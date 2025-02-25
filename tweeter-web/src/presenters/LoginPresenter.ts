@@ -5,13 +5,13 @@ export interface LoginView extends AuthView {
 }
 
 export class LoginPresenter extends AuthPresenter<LoginView> {
-    public checkSubmitButtonStatus(): boolean {
-      return !this.view.alias || !this.view.password;
+    public checkSubmitButtonStatus(alias: string, password: string): boolean {
+      return !alias || !password;
     };
-    public doAuthentication(): Promise<void> {
+    public doAuthentication(alias: string, password: string, rememberMe: boolean): Promise<void> {
       return this.doAuthenticationOperation(async () => {
-        return await this.userService.login(this.view.alias, this.view.password);
-      }, "log user in")
+        return await this.userService.login(alias, password);
+      }, "log user in", rememberMe)
     }
     protected doNavigation(): void {
       if (!!this.view.originalUrl) {
