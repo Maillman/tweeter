@@ -10,15 +10,7 @@ import userEvent, { UserEvent } from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { fab } from "@fortawesome/free-brands-svg-icons";
-import {
-  anything,
-  capture,
-  instance,
-  mock,
-  spy,
-  verify,
-  when,
-} from "@typestrong/ts-mockito";
+import { anything, instance, mock, verify } from "@typestrong/ts-mockito";
 
 library.add(fab);
 
@@ -40,7 +32,7 @@ describe("Login Component", () => {
     );
   });
 
-  it("disabled the sign-in button if either field is cleared", async () => {
+  it("disables the sign-in button if either field is cleared", async () => {
     const { signInButton, aliasField, passwordField, user } =
       renderLoginAndGetElement("/");
 

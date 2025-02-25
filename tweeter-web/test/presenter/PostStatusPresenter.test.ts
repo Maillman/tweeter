@@ -30,9 +30,6 @@ describe("PostStatusPresenter", () => {
     it("tells the view to display a posting status message", async () => {
         await postStatusPresenter.submitPost(event, post, user, authToken);
 
-        // const [capturedInfoMessage] = capture(mockPostStatusView.displayInfoMessage).last();
-        // console.log(capturedInfoMessage);
-
         verify(mockPostStatusView.displayInfoMessage("Posting status...", 0)).once();
     });
 

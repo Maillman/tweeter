@@ -40,6 +40,7 @@ const PostStatus = (props: Props) => {
         <div className="form-group mb-3">
           <textarea
             className="form-control"
+            aria-label="postStatusText"
             id="postStatusTextArea"
             rows={10}
             placeholder="What's on your mind?"
