@@ -1,0 +1,6 @@
+BUCKET='maillman-tweeter'
+LAMBDA_ROLE='arn:aws:iam::438465152124:role/tweeterlambda'
+EDIT_LAMBDALIST='
+tweeterGetFollowees | lambda/follow/GetFolloweesLambda.handler
+'
+LAMBDALAYER_ARN='arn:aws:lambda:us-east-2:438465152124:layer:tweeterLambdaLayer:2'
