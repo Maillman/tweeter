@@ -21,14 +21,15 @@ export type { AuthTokenDto } from "./model/dto/AuthTokenDto";
 //
 export type { TweeterRequest } from "./model/net/request/TweeterRequest";
 export type { PagedUserItemRequest } from "./model/net/request/PagedUserItemRequest";
-export type { LoginRequest } from "./model/net/request/LoginRequest";
+export type { AuthenticationRequest } from "./model/net/request/AuthenticationRequest";
+export type { RegisterRequest } from "./model/net/request/RegisterRequest";
 
 //
 // Responses
 //
 export type { TweeterResponse } from "./model/net/response/TweeterResponse";
 export type { PagedUserItemResponse } from "./model/net/response/PagedUserItemResponse";
-export type { LoginResponse } from "./model/net/response/LoginResponse";
+export type { AuthenticationResponse } from "./model/net/response/AuthenticationResponse";
 
 //
 // Other

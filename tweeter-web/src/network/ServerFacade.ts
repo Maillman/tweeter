@@ -1,7 +1,7 @@
 import {
   AuthToken,
-  LoginRequest,
-  LoginResponse,
+  AuthenticationRequest,
+  AuthenticationResponse,
   PagedUserItemRequest,
   PagedUserItemResponse,
   TweeterResponse,
@@ -40,10 +40,12 @@ export class ServerFacade {
     });
   }
 
-  public async login(request: LoginRequest): Promise<[User, AuthToken]> {
+  public async login(
+    request: AuthenticationRequest
+  ): Promise<[User, AuthToken]> {
     const response = await this.clientCommunicator.doPost<
-      LoginRequest,
-      LoginResponse
+      AuthenticationRequest,
+      AuthenticationResponse
     >(request, "/authenticate/login");
 
     // Convert the UserDto and the AuthTokenDto returned by ClientCommunicator to a User and AuthToken
