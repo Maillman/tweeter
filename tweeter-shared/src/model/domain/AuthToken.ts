@@ -70,4 +70,8 @@ export class AuthToken {
       timestamp: this.timestamp,
     };
   }
+
+  public static fromDto(dto: AuthTokenDto | null): AuthToken | null {
+    return dto === null ? null : new AuthToken(dto.token, dto.timestamp);
+  }
 }
