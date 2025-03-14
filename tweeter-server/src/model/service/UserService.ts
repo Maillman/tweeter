@@ -27,7 +27,7 @@ export class UserService {
     lastName: string,
     alias: string,
     password: string,
-    userImageBytes: string,
+    imageStringBase64: string,
     imageFileExtension: string
   ): Promise<[UserDto, AuthTokenDto]> {
     // TODO: Replace with the result of calling the server

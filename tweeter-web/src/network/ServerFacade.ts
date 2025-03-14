@@ -4,6 +4,7 @@ import {
   AuthenticationResponse,
   PagedUserItemRequest,
   PagedUserItemResponse,
+  RegisterRequest,
   TweeterResponse,
   User,
   UserDto,
@@ -48,6 +49,19 @@ export class ServerFacade {
       AuthenticationResponse
     >(request, "/authenticate/login");
 
+    return this.handleAuthResponse(response);
+  }
+
+  public async register(request: RegisterRequest): Promise<[User, AuthToken]> {
+    const response = await this.clientCommunicator.doPost<
+      RegisterRequest,
+      AuthenticationResponse
+    >(request, "/authenticate/register");
+
+    return this.handleAuthResponse(response);
+  }
+
+  private handleAuthResponse(response: AuthenticationResponse) {
     // Convert the UserDto and the AuthTokenDto returned by ClientCommunicator to a User and AuthToken
     const user: User | null =
       response.success && response.user ? User.fromDto(response.user) : null;
