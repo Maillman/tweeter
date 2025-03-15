@@ -1,14 +1,17 @@
+import { StatusDto } from "../dto/StatusDto";
 import { PostSegment, Type } from "./PostSegment";
+import { Transferable } from "./Transferable";
 import { User } from "./User";
 import { format } from "date-fns";
 
-export class Status {
+export class Status extends Transferable<StatusDto, Status> {
   private _post: string;
   private _user: User;
   private _timestamp: number;
   private _segments: PostSegment[];
 
   public constructor(post: string, user: User, timestamp: number) {
+    super();
     this._post = post;
     this._user = user;
     this._timestamp = timestamp;
@@ -273,5 +276,20 @@ export class Status {
 
   public toJson(): string {
     return JSON.stringify(this);
+  }
+
+  public get dto(): StatusDto {
+    return {
+      post: this.post,
+      user: this.user.dto,
+      timestamp: this.timestamp,
+    };
+  }
+
+  public static fromDto(dto: StatusDto | null): Status | null {
+    return this.tFromDto(
+      dto,
+      (dto) => new Status(dto.post, User.fromDto(dto.user)!, dto.timestamp)
+    );
   }
 }

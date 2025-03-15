@@ -1,6 +1,7 @@
 import { UserDto } from "../dto/UserDto";
+import { Transferable } from "./Transferable";
 
-export class User {
+export class User extends Transferable<UserDto, User> {
   private _firstName: string;
   private _lastName: string;
   private _alias: string;
@@ -12,6 +13,7 @@ export class User {
     alias: string,
     imageUrl: string
   ) {
+    super();
     this._firstName = firstName;
     this._lastName = lastName;
     this._alias = alias;
@@ -91,8 +93,9 @@ export class User {
   }
 
   public static fromDto(dto: UserDto | null): User | null {
-    return dto === null
-      ? null
-      : new User(dto.firstName, dto.lastName, dto.alias, dto.imageUrl);
+    return this.tFromDto(
+      dto,
+      (dto) => new User(dto.firstName, dto.lastName, dto.alias, dto.imageUrl)
+    );
   }
 }

@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { AuthTokenDto } from "../dto/AuthTokenDto";
-export class AuthToken {
+import { Transferable } from "./Transferable";
+export class AuthToken extends Transferable<AuthTokenDto, AuthToken> {
   private _token: string;
   private _timestamp: number;
 
@@ -30,6 +31,7 @@ export class AuthToken {
   }
 
   public constructor(token: string, timestamp: number) {
+    super();
     this._token = token;
     this._timestamp = timestamp;
   }
@@ -72,6 +74,6 @@ export class AuthToken {
   }
 
   public static fromDto(dto: AuthTokenDto | null): AuthToken | null {
-    return dto === null ? null : new AuthToken(dto.token, dto.timestamp);
+    return this.tFromDto(dto, (dto) => new AuthToken(dto.token, dto.timestamp));
   }
 }

@@ -1,17 +1,17 @@
 import {
   PagedUserItemRequest,
   PagedUserItemResponse,
-  UserDto,
+  StatusDto,
 } from "tweeter-shared";
-import { FollowService } from "../../model/service/FollowService";
+import { StatusService } from "../../model/service/StatusService";
 import { PagedUserItemHandler } from "../PagedUserItemHandler";
 
 export const handler = async (
-  request: PagedUserItemRequest<UserDto>
-): Promise<PagedUserItemResponse<UserDto>> => {
+  request: PagedUserItemRequest<StatusDto>
+): Promise<PagedUserItemResponse<StatusDto>> => {
   return PagedUserItemHandler(
     (token, userAlias, pageSize, lastItem) =>
-      new FollowService().loadMoreFollowees(
+      new StatusService().loadMoreFeedItems(
         token,
         userAlias,
         pageSize,
