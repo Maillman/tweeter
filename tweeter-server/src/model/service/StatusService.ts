@@ -1,4 +1,5 @@
 import { Status, FakeData, StatusDto } from "tweeter-shared";
+import { FakeDataService } from "./FakeDataService";
 
 export class StatusService {
   public async loadMoreFeedItems(
@@ -8,10 +9,7 @@ export class StatusService {
     lastItem: StatusDto | null
   ): Promise<[StatusDto[], boolean]> {
     // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(
-      Status.fromDto(lastItem),
-      pageSize
-    );
+    return FakeDataService.getFakeDataStatuses(pageSize, lastItem);
   }
 
   public async loadMoreStoryItems(
@@ -21,10 +19,7 @@ export class StatusService {
     lastItem: StatusDto | null
   ): Promise<[StatusDto[], boolean]> {
     // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(
-      Status.fromDto(lastItem),
-      pageSize
-    );
+    return FakeDataService.getFakeDataStatuses(pageSize, lastItem);
   }
 
   public async postStatus(

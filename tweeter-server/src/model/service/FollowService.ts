@@ -1,4 +1,5 @@
 import { FakeData, User, UserDto } from "tweeter-shared";
+import { FakeDataService } from "./FakeDataService";
 
 export class FollowService {
   public async loadMoreFollowers(
@@ -8,7 +9,7 @@ export class FollowService {
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
     // TODO: Replace with the result of calling server
-    return this.getFakeData(lastItem, pageSize, userAlias);
+    return FakeDataService.getFakeDataUsers(lastItem, pageSize, userAlias);
   }
 
   public async loadMoreFollowees(
@@ -18,21 +19,7 @@ export class FollowService {
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
     // TODO: Replace with the result of calling server
-    return this.getFakeData(lastItem, pageSize, userAlias);
-  }
-
-  private async getFakeData(
-    lastItem: UserDto | null,
-    pageSize: number,
-    userAlias: string
-  ): Promise<[UserDto[], boolean]> {
-    const [items, hasMore] = FakeData.instance.getPageOfUsers(
-      User.fromDto(lastItem),
-      pageSize,
-      userAlias
-    );
-    const dtos = items.map((user) => user.dto);
-    return [dtos, hasMore];
+    return FakeDataService.getFakeDataUsers(lastItem, pageSize, userAlias);
   }
 
   public async getIsFollowerStatus(

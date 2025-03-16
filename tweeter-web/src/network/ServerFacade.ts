@@ -5,11 +5,14 @@ import {
   PagedUserItemRequest,
   PagedUserItemResponse,
   RegisterRequest,
+  Status,
+  StatusDto,
   TweeterResponse,
   User,
   UserDto,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
+import { Transferable } from "tweeter-shared/dist/model/domain/Transferable";
 
 export class ServerFacade {
   private SERVER_URL =
@@ -18,23 +21,65 @@ export class ServerFacade {
   private clientCommunicator = new ClientCommunicator(this.SERVER_URL);
 
   public async getMoreFollowees(
-    request: PagedUserItemRequest
+    request: PagedUserItemRequest<UserDto>
   ): Promise<[User[], boolean]> {
     const response = await this.clientCommunicator.doPost<
-      PagedUserItemRequest,
-      PagedUserItemResponse
+      PagedUserItemRequest<UserDto>,
+      PagedUserItemResponse<UserDto>
     >(request, "/followee/list");
 
-    // Convert the UserDto array returned by ClientCommunicator to a User array
-    const items: User[] | null =
+    return this.convertDtoAndReturn<UserDto, User>(
+      response,
+      "followees",
+      (dto) => User.fromDto(dto)
+    );
+  }
+
+  public async getMoreFeedItems(
+    request: PagedUserItemRequest<StatusDto>
+  ): Promise<[Status[], boolean]> {
+    const response = await this.clientCommunicator.doPost<
+      PagedUserItemRequest<StatusDto>,
+      PagedUserItemResponse<StatusDto>
+    >(request, "/feed/list");
+
+    return this.convertDtoAndReturn<StatusDto, Status>(
+      response,
+      "feed items",
+      (dto) => Status.fromDto(dto)
+    );
+  }
+
+  public async getMoreStoryItems(
+    request: PagedUserItemRequest<StatusDto>
+  ): Promise<[Status[], boolean]> {
+    const response = await this.clientCommunicator.doPost<
+      PagedUserItemRequest<StatusDto>,
+      PagedUserItemResponse<StatusDto>
+    >(request, "/story/list");
+
+    return this.convertDtoAndReturn<StatusDto, Status>(
+      response,
+      "story items",
+      (dto) => Status.fromDto(dto)
+    );
+  }
+
+  private convertDtoAndReturn<D, T extends Transferable<D, T>>(
+    response: PagedUserItemResponse<D>,
+    itemDescription: string,
+    fromDto: (dto: D | null) => T | null
+  ) {
+    // Convert the Dto array returned by ClientCommunicator to an Item array
+    const items: T[] | null =
       response.success && response.items
-        ? response.items.map((dto) => User.fromDto(dto) as User)
+        ? response.items.map((dto) => fromDto(dto) as T)
         : null;
 
     // Handle errors
     return this.handleResponse(response, () => {
       if (items == null) {
-        throw new Error(`No followees found`);
+        throw new Error(`No ${itemDescription} found`);
       } else {
         return [items, response.hasMore];
       }
