@@ -2,12 +2,14 @@ import {
   AuthToken,
   AuthenticationRequest,
   AuthenticationResponse,
+  FollowResponse,
   PagedUserItemRequest,
   PagedUserItemResponse,
   RegisterRequest,
   Status,
   StatusDto,
   TweeterResponse,
+  UpdateItemRequest,
   User,
   UserDto,
 } from "tweeter-shared";
@@ -31,6 +33,21 @@ export class ServerFacade {
     return this.convertDtoAndReturn<UserDto, User>(
       response,
       "followees",
+      (dto) => User.fromDto(dto)
+    );
+  }
+
+  public async getMoreFollowers(
+    request: PagedUserItemRequest<UserDto>
+  ): Promise<[User[], boolean]> {
+    const response = await this.clientCommunicator.doPost<
+      PagedUserItemRequest<UserDto>,
+      PagedUserItemResponse<UserDto>
+    >(request, "/follower/list");
+
+    return this.convertDtoAndReturn<UserDto, User>(
+      response,
+      "followers",
       (dto) => User.fromDto(dto)
     );
   }
@@ -86,6 +103,50 @@ export class ServerFacade {
     });
   }
 
+  public async postStatus(
+    request: UpdateItemRequest<StatusDto>
+  ): Promise<void> {
+    const response = await this.clientCommunicator.doPost<
+      UpdateItemRequest<StatusDto>,
+      TweeterResponse
+    >(request, "/status/create");
+    return this.handleResponse(response);
+  }
+
+  public async follow(
+    request: UpdateItemRequest<UserDto>
+  ): Promise<[followerCount: number, followeeCount: number]> {
+    const response = await this.clientCommunicator.doPost<
+      UpdateItemRequest<UserDto>,
+      FollowResponse
+    >(request, "/user/follow");
+
+    return this.handleFollowResponse(response);
+  }
+
+  public async unfollow(
+    request: UpdateItemRequest<UserDto>
+  ): Promise<[followerCount: number, followeeCount: number]> {
+    const response = await this.clientCommunicator.doPost<
+      UpdateItemRequest<UserDto>,
+      FollowResponse
+    >(request, "/user/unfollow");
+
+    return this.handleFollowResponse(response);
+  }
+
+  private handleFollowResponse(
+    response: FollowResponse
+  ): [followerCount: number, followeeCount: number] {
+    return this.handleResponse(response, () => {
+      if (response.followerCount && response.followeeCount) {
+        return [response.followerCount, response.followeeCount];
+      } else {
+        throw new Error(`Unable to retrieve follower or followee count`);
+      }
+    });
+  }
+
   public async login(
     request: AuthenticationRequest
   ): Promise<[User, AuthToken]> {
@@ -127,7 +188,9 @@ export class ServerFacade {
 
   private handleResponse<R extends TweeterResponse>(
     response: R,
-    onSuccess: () => void
+    onSuccess: () => void = () => {
+      return;
+    }
   ): any {
     if (response.success) {
       return onSuccess();
