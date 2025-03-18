@@ -12,18 +12,18 @@ case $step in
         cd tweeter-server/
         zip -r nodejs.zip nodejs/
         cd ..
+        echo -e '\n\n'
+        read -p "Please upload the new nodejs.zip lambda layer to AWS, then press Enter"
         ;& # Fallthrough to the next step
 
     2)
-        echo -e '\n\n'
-        read -p "Please upload the new nodejs.zip lambda layer to AWS, then press Enter"
         echo -e '\nPrepare to edit the .server file manually using Vim'
         sleep 0.5
         vi tweeter-server/.server
         ;& # Fallthrough to the next step
 
     3)
-        echo "Starting from Step 3"
+        echo "Building Tweeter Server to dist and zipping"
         cd tweeter-server/
         npm run build
         cd dist/
