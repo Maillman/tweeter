@@ -12,6 +12,7 @@ import {
   ItemRequest,
   User,
   UserDto,
+  FollowCountResponse,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 import { Transferable } from "tweeter-shared/dist/model/domain/Transferable";
@@ -141,6 +142,39 @@ export class ServerFacade {
         return [response.followerCount, response.followeeCount];
       } else {
         throw new Error(`Unable to retrieve follower or followee count`);
+      }
+    });
+  }
+
+  public async getFollowerCount(
+    request: ItemRequest<UserDto>
+  ): Promise<number> {
+    const response = await this.clientCommunicator.doPost<
+      ItemRequest<UserDto>,
+      FollowCountResponse
+    >(request, "/follower/count");
+    return this.handleFollowCountResponse(response, "follower count");
+  }
+
+  public async getFolloweeCount(
+    request: ItemRequest<UserDto>
+  ): Promise<number> {
+    const response = await this.clientCommunicator.doPost<
+      ItemRequest<UserDto>,
+      FollowCountResponse
+    >(request, "/followee/count");
+    return this.handleFollowCountResponse(response, "followee count");
+  }
+
+  private handleFollowCountResponse(
+    response: FollowCountResponse,
+    itemDescription: string
+  ): number {
+    return this.handleResponse(response, () => {
+      if (response.count) {
+        return response.count;
+      } else {
+        throw new Error(`Unable to retrieve ${itemDescription}.`);
       }
     });
   }

@@ -50,16 +50,20 @@ export class FollowService {
     authToken: AuthToken,
     user: User
   ): Promise<number> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getFolloweeCount(user.alias);
+    return this.serverFacade.getFolloweeCount({
+      token: authToken.token,
+      item: user.dto,
+    });
   }
 
   public async getFollowerCount(
     authToken: AuthToken,
     user: User
   ): Promise<number> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getFollowerCount(user.alias);
+    return this.serverFacade.getFollowerCount({
+      token: authToken.token,
+      item: user.dto,
+    });
   }
 
   public async follow(
@@ -68,7 +72,7 @@ export class FollowService {
   ): Promise<[followerCount: number, followeeCount: number]> {
     return this.serverFacade.follow({
       token: authToken.token,
-      item: userToFollow,
+      item: userToFollow.dto,
     });
   }
 
@@ -78,7 +82,7 @@ export class FollowService {
   ): Promise<[followerCount: number, followeeCount: number]> {
     return this.serverFacade.follow({
       token: authToken.token,
-      item: userToUnfollow,
+      item: userToUnfollow.dto,
     });
   }
 }
