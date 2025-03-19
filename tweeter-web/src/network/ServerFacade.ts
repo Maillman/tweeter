@@ -13,6 +13,10 @@ import {
   User,
   UserDto,
   FollowCountResponse,
+  LogoutRequest,
+  IsFollowerRequest,
+  IsFollowerResponse,
+  ItemResponse,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 import { Transferable } from "tweeter-shared/dist/model/domain/Transferable";
@@ -104,12 +108,32 @@ export class ServerFacade {
     });
   }
 
+  public async getUser(request: ItemRequest<string>): Promise<User> {
+    const response = await this.clientCommunicator.doPost<
+      ItemRequest<string>,
+      ItemResponse<UserDto | null>
+    >(request, "/user/get");
+    return this.handleResponse(response, () => {
+      return User.fromDto(response.item);
+    });
+  }
+
   public async postStatus(request: ItemRequest<StatusDto>): Promise<void> {
     const response = await this.clientCommunicator.doPost<
       ItemRequest<StatusDto>,
       TweeterResponse
     >(request, "/status/create");
     return this.handleResponse(response);
+  }
+
+  public async getIsFollower(request: IsFollowerRequest): Promise<boolean> {
+    const response = await this.clientCommunicator.doPost<
+      IsFollowerRequest,
+      IsFollowerResponse
+    >(request, "/follower/query");
+    return this.handleResponse(response, () => {
+      return response.isFollower;
+    });
   }
 
   public async follow(
@@ -216,6 +240,14 @@ export class ServerFacade {
         throw new Error(`No user or authtoken returned`);
       }
     });
+  }
+
+  public async logout(request: LogoutRequest): Promise<void> {
+    const response = await this.clientCommunicator.doPost<
+      LogoutRequest,
+      TweeterResponse
+    >(request, "/authenticate/logout");
+    return this.handleResponse(response);
   }
 
   private handleResponse<R extends TweeterResponse>(

@@ -39,9 +39,11 @@ export class UserService {
     return [user.dto, FakeData.instance.authToken.dto];
   }
 
-  public async getUser(token: string, alias: string): Promise<User | null> {
+  public async getUser(token: string, alias: string): Promise<UserDto | null> {
     // TODO: Replace with the result of calling server
-    return FakeData.instance.findUserByAlias(alias);
+    const user = FakeData.instance.findUserByAlias(alias);
+
+    return user ? user.dto : null;
   }
 
   public async logout(token: string): Promise<void> {
