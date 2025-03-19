@@ -1,9 +1,9 @@
-import { FollowResponse, UpdateItemRequest, UserDto } from "tweeter-shared";
+import { FollowResponse, ItemRequest, UserDto } from "tweeter-shared";
 import { FollowHandler } from "./FollowHandler";
 import { FollowService } from "../../model/service/FollowService";
 
 export const handler = async (
-  request: UpdateItemRequest<UserDto>
+  request: ItemRequest<UserDto>
 ): Promise<FollowResponse> => {
   return FollowHandler(
     (token, user) => new FollowService().unfollow(token, user),

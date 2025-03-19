@@ -1,8 +1,8 @@
-import { UpdateItemRequest, TweeterResponse, StatusDto } from "tweeter-shared";
+import { ItemRequest, TweeterResponse, StatusDto } from "tweeter-shared";
 import { StatusService } from "../../model/service/StatusService";
 
 export const handler = async (
-  request: UpdateItemRequest<StatusDto>
+  request: ItemRequest<StatusDto>
 ): Promise<TweeterResponse> => {
   await new StatusService().postStatus(request.token, request.item);
   return {

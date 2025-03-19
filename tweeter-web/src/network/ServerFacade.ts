@@ -9,7 +9,7 @@ import {
   Status,
   StatusDto,
   TweeterResponse,
-  UpdateItemRequest,
+  ItemRequest,
   User,
   UserDto,
 } from "tweeter-shared";
@@ -103,21 +103,19 @@ export class ServerFacade {
     });
   }
 
-  public async postStatus(
-    request: UpdateItemRequest<StatusDto>
-  ): Promise<void> {
+  public async postStatus(request: ItemRequest<StatusDto>): Promise<void> {
     const response = await this.clientCommunicator.doPost<
-      UpdateItemRequest<StatusDto>,
+      ItemRequest<StatusDto>,
       TweeterResponse
     >(request, "/status/create");
     return this.handleResponse(response);
   }
 
   public async follow(
-    request: UpdateItemRequest<UserDto>
+    request: ItemRequest<UserDto>
   ): Promise<[followerCount: number, followeeCount: number]> {
     const response = await this.clientCommunicator.doPost<
-      UpdateItemRequest<UserDto>,
+      ItemRequest<UserDto>,
       FollowResponse
     >(request, "/user/follow");
 
@@ -125,10 +123,10 @@ export class ServerFacade {
   }
 
   public async unfollow(
-    request: UpdateItemRequest<UserDto>
+    request: ItemRequest<UserDto>
   ): Promise<[followerCount: number, followeeCount: number]> {
     const response = await this.clientCommunicator.doPost<
-      UpdateItemRequest<UserDto>,
+      ItemRequest<UserDto>,
       FollowResponse
     >(request, "/user/unfollow");
 

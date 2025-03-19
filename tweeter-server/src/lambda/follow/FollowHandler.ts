@@ -1,8 +1,8 @@
-import { FollowResponse, UpdateItemRequest, UserDto } from "tweeter-shared";
+import { FollowResponse, ItemRequest, UserDto } from "tweeter-shared";
 
 export const FollowHandler = async (
   serviceMethod: (token: string, user: UserDto) => Promise<[number, number]>,
-  request: UpdateItemRequest<UserDto>
+  request: ItemRequest<UserDto>
 ): Promise<FollowResponse> => {
   const [followerCount, followeeCount] = await serviceMethod(
     request.token,
