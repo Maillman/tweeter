@@ -25,6 +25,8 @@ export type { PagedUserItemRequest } from "./model/net/request/PagedUserItemRequ
 export type { AuthenticationRequest } from "./model/net/request/AuthenticationRequest";
 export type { RegisterRequest } from "./model/net/request/RegisterRequest";
 export type { ItemRequest } from "./model/net/request/ItemRequest";
+export type { IsFollowerRequest } from "./model/net/request/IsFollowerRequest";
+export type { LogoutRequest } from "./model/net/request/LogoutRequest";
 
 //
 // Responses
@@ -34,6 +36,8 @@ export type { PagedUserItemResponse } from "./model/net/response/PagedUserItemRe
 export type { AuthenticationResponse } from "./model/net/response/AuthenticationResponse";
 export type { FollowResponse } from "./model/net/response/FollowResponse";
 export type { FollowCountResponse } from "./model/net/response/FollowCountReponse";
+export type { IsFollowerResponse } from "./model/net/response/IsFollowerResponse";
+export type { ItemResponse } from "./model/net/response/ItemResponse";
 
 //
 // Other
