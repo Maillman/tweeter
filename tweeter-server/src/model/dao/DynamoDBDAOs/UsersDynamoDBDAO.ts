@@ -8,7 +8,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { User } from "tweeter-shared";
-import { UsersDAO } from "./UsersDAO";
+import { UsersDAO } from "../UsersDAO";
 
 export class UsersDynamoDBDAO implements UsersDAO {
   readonly tableName = "users";

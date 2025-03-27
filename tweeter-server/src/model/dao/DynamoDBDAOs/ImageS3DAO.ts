@@ -1,4 +1,4 @@
-import { ImageDAO } from "./ImageDAO";
+import { ImageDAO } from "../ImageDAO";
 import {
   S3Client,
   PutObjectCommand,

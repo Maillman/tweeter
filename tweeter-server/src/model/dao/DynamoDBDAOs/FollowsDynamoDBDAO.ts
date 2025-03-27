@@ -7,9 +7,9 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DataPage } from "../entity/DataPage";
-import { Follow } from "../entity/Follow";
-import { FollowsDAO } from "./FollowsDAO";
+import { DataPage } from "../../entity/DataPage";
+import { Follow } from "../../entity/Follow";
+import { FollowsDAO } from "../FollowsDAO";
 
 export class FollowsDynamoDBDAO implements FollowsDAO {
   readonly tableName = "follows";
