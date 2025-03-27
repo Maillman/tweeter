@@ -4,11 +4,12 @@ import {
   RegisterRequest,
 } from "tweeter-shared";
 import { UserService } from "../../model/service/UserService";
+import { DynamoDBDAOFactory } from "../../model/dao/DynamoDBDAOs/DynamoDBDAOFactory";
 
 export const AuthenticationHandler = async <R extends AuthenticationRequest>(
   request: R
 ): Promise<AuthenticationResponse> => {
-  const userService = new UserService();
+  const userService = new UserService(new DynamoDBDAOFactory());
   const [user, authToken] = await (isRegisterRequest(request)
     ? userService.register(
         request.firstName,
