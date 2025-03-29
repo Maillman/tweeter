@@ -11,6 +11,7 @@ import { DAOFactory } from "../dao/DAOFactory";
 import { UsersDAO } from "../dao/UsersDAO";
 import { ImageDAO } from "../dao/ImageDAO";
 import { SessionsDAO } from "../dao/SessionsDAO";
+import { VerifyTokenService } from "./VerifyTokenService";
 
 export class UserService {
   private daoFactory: DAOFactory;
@@ -28,14 +29,7 @@ export class UserService {
     alias: string,
     password: string
   ): Promise<[UserDto, AuthTokenDto]> {
-    //Get user in database
-    const userAndPassword = await this.usersDAO.getUser(alias);
-
-    if (userAndPassword === undefined) {
-      throw new Error("[Bad Request] Invalid alias");
-    }
-
-    const [user, hashedPassword] = userAndPassword;
+    const [user, hashedPassword] = await this.getUserDetails(alias);
 
     //Check password w/ hashedPassword
     if (!(await bcrypt.compare(password, hashedPassword))) {
@@ -83,8 +77,10 @@ export class UserService {
   }
 
   public async getUser(token: string, alias: string): Promise<UserDto | null> {
-    // TODO: Replace with the result of calling server
-    const user = FakeData.instance.findUserByAlias(alias);
+    console.log(token, alias);
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+    console.log("token has been verified");
+    const [user] = await this.getUserDetails(alias);
 
     return user ? user.dto : null;
   }
@@ -100,5 +96,14 @@ export class UserService {
     await this.sessionsDAO.putAuthToken(token, timestamp);
 
     return new AuthToken(token, timestamp);
+  }
+  private async getUserDetails(alias: string) {
+    //Get user in database
+    const userAndPassword = await this.usersDAO.getUser(alias);
+
+    if (userAndPassword === undefined) {
+      throw new Error("[Server Error] Problem getting user for " + alias);
+    }
+    return userAndPassword;
   }
 }

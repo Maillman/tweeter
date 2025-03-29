@@ -13,7 +13,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 export class SessionsDynamoDBDAO implements SessionsDAO {
   readonly tableName = "sessions";
   readonly tokenAttr = "token";
-  readonly timestampAttr = "timestamp";
+  readonly timestampAttr = "token_timestamp";
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
@@ -40,14 +40,14 @@ export class SessionsDynamoDBDAO implements SessionsDAO {
           output.Item[this.timestampAttr]
         );
   }
-  async updateAuthToken(token: string, timestamp: number) {
+  async updateAuthToken(token: string, timestamp: number): Promise<void> {
     const params = {
       TableName: this.tableName,
       Key: { [this.tokenAttr]: token },
       ExpressionAttributeValues: {
         ":tsp": timestamp,
       },
-      UpdateExpression: "SET " + this.timestampAttr + " = :tsp,",
+      UpdateExpression: "SET " + this.timestampAttr + " = :tsp",
     };
     await this.client.send(new UpdateCommand(params));
   }

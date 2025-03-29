@@ -1,27 +1,10 @@
 export class Follow {
-  private _follower: string;
   private _followerHandle: string;
-  private _followee: string;
   private _followeeHandle: string;
 
-  constructor(
-    follower: string,
-    followerHandle: string,
-    followee: string,
-    followeeHandle: string
-  ) {
-    this._follower = follower;
+  constructor(followerHandle: string, followeeHandle: string) {
     this._followerHandle = followerHandle;
-    this._followee = followee;
     this._followeeHandle = followeeHandle;
-  }
-
-  public get follower(): string {
-    return this._follower;
-  }
-
-  public get followee(): string {
-    return this._followee;
   }
 
   public get followerHandle(): string {

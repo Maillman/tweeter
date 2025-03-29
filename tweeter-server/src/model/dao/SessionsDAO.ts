@@ -6,4 +6,5 @@ export interface SessionsDAO {
   putAuthToken(token: string, timestamp: number): Promise<void>;
   getAuthToken(token: string): Promise<AuthToken | undefined>;
   deleteAuthToken(token: string): Promise<void>;
+  updateAuthToken(token: string, timestamp: number): Promise<void>;
 }

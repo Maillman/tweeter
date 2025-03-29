@@ -16,8 +16,6 @@ export class FollowsDynamoDBDAO implements FollowsDAO {
   readonly indexName = "follows_index";
   readonly followerHandleAttr = "follower_handle";
   readonly followeeHandleAttr = "followee_handle";
-  readonly followerNameAttr = "follower";
-  readonly followeeNameAttr = "followee";
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
@@ -27,32 +25,31 @@ export class FollowsDynamoDBDAO implements FollowsDAO {
       Item: {
         [this.followerHandleAttr]: follow.followerHandle,
         [this.followeeHandleAttr]: follow.followeeHandle,
-        [this.followerNameAttr]: follow.follower,
-        [this.followeeNameAttr]: follow.followee,
       },
     };
     await this.client.send(new PutCommand(params));
   }
 
   async updateFollow(follower: Follow): Promise<void> {
-    const params = {
-      TableName: this.tableName,
-      Key: this.generateFollowItem(follower),
-      ExpressionAttributeValues: {
-        ":foe": follower.follower,
-        ":for": follower.followee,
-      },
-      UpdateExpression:
-        "SET " +
-        this.followeeNameAttr +
-        " = " +
-        ":foe," +
-        "" +
-        this.followerNameAttr +
-        " = " +
-        ":for",
-    };
-    await this.client.send(new UpdateCommand(params));
+    // const params = {
+    //   TableName: this.tableName,
+    //   Key: this.generateFollowItem(follower),
+    //   ExpressionAttributeValues: {
+    //     ":foe": follower.follower,
+    //     ":for": follower.followee,
+    //   },
+    //   UpdateExpression:
+    //     "SET " +
+    //     this.followeeNameAttr +
+    //     " = " +
+    //     ":foe," +
+    //     "" +
+    //     this.followerNameAttr +
+    //     " = " +
+    //     ":for",
+    // };
+    // await this.client.send(new UpdateCommand(params));
+    throw new Error("I'm unsure if I want to keep this method");
   }
 
   async getFollow(follow: Follow): Promise<Follow | undefined> {
@@ -64,9 +61,7 @@ export class FollowsDynamoDBDAO implements FollowsDAO {
     return output.Item == undefined
       ? undefined
       : new Follow(
-          output.Item[this.followeeNameAttr],
           output.Item[this.followerHandleAttr],
-          output.Item[this.followeeNameAttr],
           output.Item[this.followeeHandleAttr]
         );
   }
@@ -109,12 +104,7 @@ export class FollowsDynamoDBDAO implements FollowsDAO {
     const hasMorePages = data.LastEvaluatedKey !== undefined;
     data.Items?.forEach((item) =>
       items.push(
-        new Follow(
-          item[this.followerNameAttr],
-          item[this.followerHandleAttr],
-          item[this.followeeNameAttr],
-          item[this.followeeHandleAttr]
-        )
+        new Follow(item[this.followerHandleAttr], item[this.followeeHandleAttr])
       )
     );
 
@@ -148,12 +138,7 @@ export class FollowsDynamoDBDAO implements FollowsDAO {
     const hasMorePages = data.LastEvaluatedKey !== undefined;
     data.Items?.forEach((item) =>
       items.push(
-        new Follow(
-          item[this.followerNameAttr],
-          item[this.followerHandleAttr],
-          item[this.followeeNameAttr],
-          item[this.followeeHandleAttr]
-        )
+        new Follow(item[this.followerHandleAttr], item[this.followeeHandleAttr])
       )
     );
 
