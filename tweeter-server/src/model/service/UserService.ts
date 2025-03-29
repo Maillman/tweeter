@@ -10,14 +10,17 @@ import bcrypt from "bcryptjs";
 import { DAOFactory } from "../dao/DAOFactory";
 import { UsersDAO } from "../dao/UsersDAO";
 import { ImageDAO } from "../dao/ImageDAO";
+import { SessionsDAO } from "../dao/SessionsDAO";
 
 export class UserService {
   private daoFactory: DAOFactory;
   private usersDAO: UsersDAO;
+  private sessionsDAO: SessionsDAO;
   private imageDAO: ImageDAO;
   constructor(daoFactory: DAOFactory) {
     this.daoFactory = daoFactory;
     this.usersDAO = daoFactory.getUsersDAO();
+    this.sessionsDAO = daoFactory.getSessionsDAO();
     this.imageDAO = daoFactory.getImageDAO();
   }
 
@@ -39,7 +42,8 @@ export class UserService {
       throw new Error("[Bad Request] Invalid password");
     }
 
-    return [user.dto, FakeData.instance.authToken.dto];
+    const authToken = await this.createAndStoreAuthToken();
+    return [user.dto, authToken.dto];
   }
 
   public async register(
@@ -74,7 +78,8 @@ export class UserService {
       throw new Error("[Bad Request] Invalid registration");
     }
 
-    return [user.dto, FakeData.instance.authToken.dto];
+    const authToken = await this.createAndStoreAuthToken();
+    return [user.dto, authToken.dto];
   }
 
   public async getUser(token: string, alias: string): Promise<UserDto | null> {
@@ -85,7 +90,15 @@ export class UserService {
   }
 
   public async logout(token: string): Promise<void> {
-    // Pause so we can see the logging out message. Delete when the call to the server is implemented.
-    await new Promise((res) => setTimeout(res, 1000));
+    await this.sessionsDAO.deleteAuthToken(token);
+  }
+
+  private async createAndStoreAuthToken(): Promise<AuthToken> {
+    const token = uuid().toString();
+    const timestamp = Date.now();
+
+    await this.sessionsDAO.putAuthToken(token, timestamp);
+
+    return new AuthToken(token, timestamp);
   }
 }
