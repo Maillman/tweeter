@@ -18,6 +18,8 @@ export abstract class AuthPresenter<V extends AuthView> extends Presenter<V> {
 
   private _navigate = useNavigate();
 
+  private isAuthenticating: boolean = false;
+
   public constructor(view: V) {
     super(view);
     this._userService = new UserService();
@@ -67,9 +69,12 @@ export abstract class AuthPresenter<V extends AuthView> extends Presenter<V> {
     itemDescription: string,
     rememberMe: boolean
   ) {
+    if (this.isAuthenticating) return;
     this.doFailureReportingOperation(async () => {
       this.view.setIsLoading(true);
+      this.isAuthenticating = true;
       const [user, authToken] = await operation();
+      this.isAuthenticating = false;
       this.view.updateUserInfo(user, user, authToken, rememberMe);
       this.doNavigation();
     }, itemDescription);
