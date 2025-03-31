@@ -195,7 +195,7 @@ export class ServerFacade {
     itemDescription: string
   ): number {
     return this.handleResponse(response, () => {
-      if (response.count) {
+      if (response.count !== undefined) {
         return response.count;
       } else {
         throw new Error(`Unable to retrieve ${itemDescription}.`);
