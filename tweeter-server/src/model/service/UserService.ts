@@ -29,7 +29,10 @@ export class UserService {
     alias: string,
     password: string
   ): Promise<[UserDto, AuthTokenDto]> {
-    const [user, hashedPassword] = await this.getUserDetails(alias);
+    const [user, hashedPassword] = await UserService.getUserDetails(
+      this.usersDAO,
+      alias
+    );
 
     //Check password w/ hashedPassword
     if (!(await bcrypt.compare(password, hashedPassword))) {
@@ -80,7 +83,7 @@ export class UserService {
     console.log(token, alias);
     await VerifyTokenService.verifyToken(this.sessionsDAO, token);
     console.log("token has been verified");
-    const [user] = await this.getUserDetails(alias);
+    const [user] = await UserService.getUserDetails(this.usersDAO, alias);
 
     return user ? user.dto : null;
   }
@@ -97,13 +100,16 @@ export class UserService {
 
     return new AuthToken(token, timestamp);
   }
-  private async getUserDetails(alias: string) {
+  public static async getUserDetails(
+    usersDAO: UsersDAO,
+    alias: string
+  ): Promise<[User, string, number, number]> {
     //Get user in database
-    const userAndPassword = await this.usersDAO.getUser(alias);
+    const userDetails = await usersDAO.getUser(alias);
 
-    if (userAndPassword === undefined) {
+    if (userDetails === undefined) {
       throw new Error("[Server Error] Problem getting user for " + alias);
     }
-    return userAndPassword;
+    return userDetails;
   }
 }

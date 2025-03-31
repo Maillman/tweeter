@@ -7,15 +7,18 @@ import { VerifyTokenService } from "./VerifyTokenService";
 import { Follow } from "../entity/Follow";
 import { UserService } from "./UserService";
 import { DataPage } from "../entity/DataPage";
+import { UsersDAO } from "../dao/UsersDAO";
 
 export class FollowService {
   private daoFactory: DAOFactory;
   private followsDAO: FollowsDAO;
+  private usersDAO: UsersDAO;
   private sessionsDAO: SessionsDAO;
 
   constructor(daoFactory: DAOFactory) {
     this.daoFactory = daoFactory;
     this.followsDAO = daoFactory.getFollowsDAO();
+    this.usersDAO = daoFactory.getUsersDAO();
     this.sessionsDAO = daoFactory.getSessionsDAO();
   }
 
@@ -74,17 +77,16 @@ export class FollowService {
     console.log(pageOfFollows);
 
     //Map follows to userDtos
-    const userService = new UserService(this.daoFactory);
-    const userAndNullDtos: (UserDto | null)[] = await Promise.all(
-      pageOfFollows.values.map(
-        async (Follow) =>
-          await userService.getUser(
-            token,
-            getFollowees ? Follow.followeeHandle : Follow.followerHandle
-          )
-      )
+    //const userService = new UserService(this.daoFactory);
+    const userDtos: UserDto[] = await Promise.all(
+      pageOfFollows.values.map(async (Follow) => {
+        const [user] = await UserService.getUserDetails(
+          this.usersDAO,
+          getFollowees ? Follow.followeeHandle : Follow.followerHandle
+        );
+        return user.dto;
+      })
     );
-    const userDtos: UserDto[] = userAndNullDtos.filter(Boolean) as UserDto[];
 
     return [userDtos, pageOfFollows.hasMorePages];
   }
@@ -99,13 +101,25 @@ export class FollowService {
   }
 
   public async getFolloweeCount(token: string, user: UserDto): Promise<number> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getFolloweeCount(user.alias);
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+
+    const [, , , followeeCount] = await UserService.getUserDetails(
+      this.usersDAO,
+      user.alias
+    );
+    return followeeCount;
   }
 
   public async getFollowerCount(token: string, user: UserDto): Promise<number> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getFollowerCount(user.alias);
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+
+    const [, , followerCount] = await UserService.getUserDetails(
+      this.usersDAO,
+      user.alias
+    );
+    return followerCount;
   }
 
   public async follow(
