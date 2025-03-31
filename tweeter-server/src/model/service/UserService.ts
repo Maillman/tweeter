@@ -66,7 +66,7 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(password, salt);
     //Storing user in database
     const user = new User(firstName, lastName, alias, imageUrl);
-    await this.usersDAO.putUser(user, hashedPassword);
+    await this.usersDAO.putUser(user, hashedPassword, 0, 0);
 
     if (user === null) {
       throw new Error("[Bad Request] Invalid registration");

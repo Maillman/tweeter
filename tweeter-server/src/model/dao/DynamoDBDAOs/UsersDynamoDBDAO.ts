@@ -16,11 +16,18 @@ export class UsersDynamoDBDAO implements UsersDAO {
   readonly firstNameAttr = "first_name";
   readonly lastNameAttr = "last_name";
   readonly passwordAttr = "password";
-  readonly imageUrlAttr = "imageUrlAttr";
+  readonly imageUrlAttr = "image_url";
+  readonly followerCountAttr = "follower_count";
+  readonly followeeCountAttr = "followee_count";
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
-  async putUser(user: User, hashedPassword: string): Promise<void> {
+  async putUser(
+    user: User,
+    hashedPassword: string,
+    followerCount: number,
+    followeeCount: number
+  ): Promise<void> {
     const params = {
       TableName: this.tableName,
       Item: {
@@ -29,12 +36,16 @@ export class UsersDynamoDBDAO implements UsersDAO {
         [this.lastNameAttr]: user.lastName,
         [this.imageUrlAttr]: user.imageUrl,
         [this.passwordAttr]: hashedPassword,
+        [this.followerCountAttr]: followerCount,
+        [this.followeeCountAttr]: followeeCount,
       },
     };
     await this.client.send(new PutCommand(params));
   }
 
-  async getUser(handle: string): Promise<[User, string] | undefined> {
+  async getUser(
+    handle: string
+  ): Promise<[User, string, number, number] | undefined> {
     const params = {
       TableName: this.tableName,
       Key: { [this.handleAttr]: handle },
@@ -50,6 +61,8 @@ export class UsersDynamoDBDAO implements UsersDAO {
             output.Item[this.imageUrlAttr]
           ),
           output.Item[this.passwordAttr],
+          output.Item[this.followerCountAttr],
+          output.Item[this.followeeCountAttr],
         ];
   }
 
