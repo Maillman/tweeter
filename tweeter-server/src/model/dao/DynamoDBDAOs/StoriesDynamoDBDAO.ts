@@ -33,10 +33,39 @@ export class StoriesDynamoDBDAO implements StoriesDAO {
   }
   async getPageOfStories(
     userAlias: string,
-    pageSize: number,
-    lastItem: StatusDto | null
+    pageSize: number = 5,
+    lastTimestamp: number | undefined = undefined
   ): Promise<DataPage<Story>> {
-    throw new Error("Method not implemented.");
+    const params = {
+      KeyConditionExpression: this.handleAttr + " = :hl",
+      ExpressionAttributeValues: {
+        ":hl": userAlias,
+      },
+      TableName: this.tableName,
+      Limit: pageSize,
+      ExclusiveStartKey:
+        lastTimestamp === undefined
+          ? undefined
+          : {
+              [this.handleAttr]: userAlias,
+              [this.statusTimestampAttr]: lastTimestamp,
+            },
+    };
+
+    const items: Story[] = [];
+    const data = await this.client.send(new QueryCommand(params));
+    const hasMorePages = data.LastEvaluatedKey !== undefined;
+    data.Items?.forEach((item) =>
+      items.push(
+        new Story(
+          item[this.handleAttr],
+          item[this.statusTimestampAttr],
+          item[this.postAttr]
+        )
+      )
+    );
+
+    return new DataPage<Story>(items, hasMorePages);
   }
   async deleteStory(status: StatusDto): Promise<void> {
     throw new Error("Method not implemented.");

@@ -6,6 +6,7 @@ import { SessionsDAO } from "../dao/SessionsDAO";
 import { UsersDAO } from "../dao/UsersDAO";
 import { StoriesDAO } from "../dao/StoriesDAO";
 import { VerifyTokenService } from "./VerifyTokenService";
+import { UserService } from "./UserService";
 
 export class StatusService {
   private daoFactory: DAOFactory;
@@ -38,8 +39,28 @@ export class StatusService {
     pageSize: number,
     lastItem: StatusDto | null
   ): Promise<[StatusDto[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeDataService.getFakeDataStatuses(pageSize, lastItem);
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, authToken);
+
+    //Get page of Stories
+    const stories = await this.storiesDAO.getPageOfStories(
+      userAlias,
+      pageSize,
+      lastItem ? lastItem.timestamp : undefined
+    );
+
+    //Convert Stories to StatusDtos
+    const storyItems = await Promise.all(
+      stories.values.map(async (Story) => {
+        const [user] = await UserService.getUserDetails(
+          this.usersDAO,
+          Story.alias
+        );
+        return new Status(Story.post, user, Story.timestamp).dto;
+      })
+    );
+
+    return [storyItems, stories.hasMorePages];
   }
 
   public async postStatus(

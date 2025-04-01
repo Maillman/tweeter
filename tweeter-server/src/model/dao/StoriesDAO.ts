@@ -7,7 +7,7 @@ export interface StoriesDAO {
   getPageOfStories(
     userAlias: string,
     pageSize: number,
-    lastItem: StatusDto | null
+    lastTimestamp: number | undefined
   ): Promise<DataPage<Story>>;
   deleteStory(status: StatusDto): Promise<void>;
 }
