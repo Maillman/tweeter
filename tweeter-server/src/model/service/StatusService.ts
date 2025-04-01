@@ -1,7 +1,27 @@
 import { Status, FakeData, StatusDto } from "tweeter-shared";
 import { FakeDataService } from "./FakeDataService";
+import { DAOFactory } from "../dao/DAOFactory";
+import { FollowsDAO } from "../dao/FollowsDAO";
+import { SessionsDAO } from "../dao/SessionsDAO";
+import { UsersDAO } from "../dao/UsersDAO";
+import { StoriesDAO } from "../dao/StoriesDAO";
+import { VerifyTokenService } from "./VerifyTokenService";
 
 export class StatusService {
+  private daoFactory: DAOFactory;
+  private followsDAO: FollowsDAO;
+  private usersDAO: UsersDAO;
+  private sessionsDAO: SessionsDAO;
+  private storiesDAO: StoriesDAO;
+
+  constructor(daoFactory: DAOFactory) {
+    this.daoFactory = daoFactory;
+    this.followsDAO = daoFactory.getFollowsDAO();
+    this.usersDAO = daoFactory.getUsersDAO();
+    this.sessionsDAO = daoFactory.getSessionsDAO();
+    this.storiesDAO = daoFactory.getStoriesDAO();
+  }
+
   public async loadMoreFeedItems(
     authToken: string,
     userAlias: string,
@@ -26,9 +46,13 @@ export class StatusService {
     authToken: string,
     newStatus: StatusDto
   ): Promise<void> {
-    // Pause so we can see the logging out message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, authToken);
 
-    // TODO: Call the server to post the status
+    //Post status to story
+    await this.storiesDAO.putStory(newStatus);
+
+    //Post status to feeds of all users following user
+    //TODO: Add this functionality!
   }
 }
