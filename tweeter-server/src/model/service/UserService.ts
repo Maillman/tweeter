@@ -39,7 +39,7 @@ export class UserService {
       throw new Error("[Bad Request] Invalid password");
     }
 
-    const authToken = await this.createAndStoreAuthToken();
+    const authToken = await this.createAndStoreAuthToken(alias);
     return [user.dto, authToken.dto];
   }
 
@@ -75,14 +75,13 @@ export class UserService {
       throw new Error("[Bad Request] Invalid registration");
     }
 
-    const authToken = await this.createAndStoreAuthToken();
+    const authToken = await this.createAndStoreAuthToken(alias);
     return [user.dto, authToken.dto];
   }
 
   public async getUser(token: string, alias: string): Promise<UserDto | null> {
-    console.log(token, alias);
     await VerifyTokenService.verifyToken(this.sessionsDAO, token);
-    console.log("token has been verified");
+
     const [user] = await UserService.getUserDetails(this.usersDAO, alias);
 
     return user ? user.dto : null;
@@ -92,11 +91,11 @@ export class UserService {
     await this.sessionsDAO.deleteAuthToken(token);
   }
 
-  private async createAndStoreAuthToken(): Promise<AuthToken> {
+  private async createAndStoreAuthToken(alias: string): Promise<AuthToken> {
     const token = uuid().toString();
     const timestamp = Date.now();
 
-    await this.sessionsDAO.putAuthToken(token, timestamp);
+    await this.sessionsDAO.putAuthToken(token, timestamp, alias);
 
     return new AuthToken(token, timestamp);
   }

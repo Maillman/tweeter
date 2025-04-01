@@ -43,6 +43,29 @@ export class UsersDynamoDBDAO implements UsersDAO {
     await this.client.send(new PutCommand(params));
   }
 
+  async updateUserFollowRelationship(
+    handle: string,
+    followerChange: number,
+    followeeChange: number
+  ): Promise<void> {
+    const params = {
+      TableName: this.tableName,
+      Key: { [this.handleAttr]: handle },
+      ExpressionAttributeValues: {
+        ":for": followerChange,
+        ":foe": followeeChange,
+      },
+      UpdateExpression:
+        "ADD " +
+        this.followeeCountAttr +
+        " :foe," +
+        "" +
+        this.followerCountAttr +
+        " :for",
+    };
+    await this.client.send(new UpdateCommand(params));
+  }
+
   async getUser(
     handle: string
   ): Promise<[User, string, number, number] | undefined> {

@@ -14,18 +14,32 @@ export class SessionsDynamoDBDAO implements SessionsDAO {
   readonly tableName = "sessions";
   readonly tokenAttr = "token";
   readonly timestampAttr = "token_timestamp";
+  readonly handleAttr = "handle";
 
   private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
 
-  async putAuthToken(token: string, timestamp: number): Promise<void> {
+  async putAuthToken(
+    token: string,
+    timestamp: number,
+    handle: string
+  ): Promise<void> {
     const params = {
       TableName: this.tableName,
       Item: {
         [this.tokenAttr]: token,
         [this.timestampAttr]: timestamp,
+        [this.handleAttr]: handle,
       },
     };
     await this.client.send(new PutCommand(params));
+  }
+  async getUserHandle(token: string): Promise<string | undefined> {
+    const params = {
+      TableName: this.tableName,
+      Key: { [this.tokenAttr]: token },
+    };
+    const output = await this.client.send(new GetCommand(params));
+    return output.Item === undefined ? undefined : output.Item[this.handleAttr];
   }
   async getAuthToken(token: string): Promise<AuthToken | undefined> {
     const params = {

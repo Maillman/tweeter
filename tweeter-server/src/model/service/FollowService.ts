@@ -54,7 +54,7 @@ export class FollowService {
     );
   }
 
-  public async loadMoreFollows(
+  private async loadMoreFollows(
     pageOperation: (
       followerHandle: string,
       lastFolloweeHandle: string | undefined,
@@ -126,28 +126,61 @@ export class FollowService {
     token: string,
     userToFollow: UserDto
   ): Promise<[followerCount: number, followeeCount: number]> {
-    // Pause so we can see the follow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server
-
-    const followerCount = await this.getFollowerCount(token, userToFollow);
-    const followeeCount = await this.getFolloweeCount(token, userToFollow);
-
-    return [followerCount, followeeCount];
+    return await this.changeFollowRelationship(token, userToFollow, true);
   }
 
   public async unfollow(
     token: string,
     userToUnfollow: UserDto
   ): Promise<[followerCount: number, followeeCount: number]> {
-    // Pause so we can see the unfollow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
+    return await this.changeFollowRelationship(token, userToUnfollow, false);
+  }
 
-    // TODO: Call the server
+  private async changeFollowRelationship(
+    token: string,
+    userToChangeFollow: UserDto,
+    isToFollow: boolean
+  ): Promise<[followerCount: number, followeeCount: number]> {
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
 
-    const followerCount = await this.getFollowerCount(token, userToUnfollow);
-    const followeeCount = await this.getFolloweeCount(token, userToUnfollow);
+    //Get userAlias from token
+    const userAlias: string | undefined = await this.sessionsDAO.getUserHandle(
+      token
+    );
+    if (userAlias === undefined) {
+      throw new Error("[Server Error] Unable to retrieve your alias");
+    }
+
+    //Updte the follow relationship
+    await this.usersDAO.updateUserFollowRelationship(
+      userAlias,
+      0,
+      isToFollow ? 1 : -1
+    );
+    await this.usersDAO.updateUserFollowRelationship(
+      userToChangeFollow.alias,
+      isToFollow ? 1 : -1,
+      0
+    );
+    if (isToFollow) {
+      await this.followsDAO.putFollow(
+        new Follow(userToChangeFollow.alias, userAlias)
+      );
+    } else {
+      await this.followsDAO.deleteFollow(
+        new Follow(userToChangeFollow.alias, userAlias)
+      );
+    }
+
+    const followerCount = await this.getFollowerCount(
+      token,
+      userToChangeFollow
+    );
+    const followeeCount = await this.getFolloweeCount(
+      token,
+      userToChangeFollow
+    );
 
     return [followerCount, followeeCount];
   }
