@@ -165,11 +165,11 @@ export class FollowService {
     );
     if (isToFollow) {
       await this.followsDAO.putFollow(
-        new Follow(userToChangeFollow.alias, userAlias)
+        new Follow(userAlias, userToChangeFollow.alias)
       );
     } else {
       await this.followsDAO.deleteFollow(
-        new Follow(userToChangeFollow.alias, userAlias)
+        new Follow(userAlias, userToChangeFollow.alias)
       );
     }
 
