@@ -96,8 +96,15 @@ export class FollowService {
     user: UserDto,
     selectedUser: UserDto
   ): Promise<boolean> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.isFollower();
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+
+    //Get follow relationship
+    const followRelationship = await this.followsDAO.getFollow(
+      new Follow(user.alias, selectedUser.alias)
+    );
+
+    return followRelationship !== undefined;
   }
 
   public async getFolloweeCount(token: string, user: UserDto): Promise<number> {
@@ -149,10 +156,20 @@ export class FollowService {
       token
     );
     if (userAlias === undefined) {
-      throw new Error("[Server Error] Unable to retrieve your alias");
+      throw new Error("[Server Error] Unable to retrieve your information");
     }
 
-    //Updte the follow relationship
+    //Confirm relationship exists if to unfollow
+    if (!isToFollow) {
+      const [user] = await UserService.getUserDetails(this.usersDAO, userAlias);
+      if (
+        !(await this.getIsFollowerStatus(token, user.dto, userToChangeFollow))
+      ) {
+        throw new Error("[Bad Request] You aren't following this user");
+      }
+    }
+
+    //Update the follow relationship
     await this.usersDAO.updateUserFollowRelationship(
       userAlias,
       0,
