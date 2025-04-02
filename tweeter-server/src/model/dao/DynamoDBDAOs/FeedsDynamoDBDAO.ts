@@ -33,12 +33,41 @@ export class FeedsDynamoDBDAO implements FeedsDAO {
     };
     await this.client.send(new PutCommand(params));
   }
-  getPageOfFeed(
+  async getPageOfFeed(
     userAlias: string,
     pageSize: number = 5,
     lastTimestamp: number | undefined
   ): Promise<DataPage<Story>> {
-    throw new Error("Method not implemented.");
+    const params = {
+      KeyConditionExpression: this.handleAttr + " = :hl",
+      ExpressionAttributeValues: {
+        ":hl": userAlias,
+      },
+      TableName: this.tableName,
+      Limit: pageSize,
+      ExclusiveStartKey:
+        lastTimestamp === undefined
+          ? undefined
+          : {
+              [this.handleAttr]: userAlias,
+              [this.statusTimestampAttr]: lastTimestamp,
+            },
+    };
+
+    const items: Story[] = [];
+    const data = await this.client.send(new QueryCommand(params));
+    const hasMorePages = data.LastEvaluatedKey !== undefined;
+    data.Items?.forEach((item) =>
+      items.push(
+        new Story(
+          item[this.authorHandleAttr],
+          item[this.statusTimestampAttr],
+          item[this.postAttr]
+        )
+      )
+    );
+
+    return new DataPage<Story>(items, hasMorePages);
   }
   deleteFeed(status: StatusDto): Promise<void> {
     throw new Error("Method not implemented.");

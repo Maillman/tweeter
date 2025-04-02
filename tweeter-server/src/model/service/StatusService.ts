@@ -9,6 +9,8 @@ import { VerifyTokenService } from "./VerifyTokenService";
 import { UserService } from "./UserService";
 import { FollowService } from "./FollowService";
 import { FeedsDAO } from "../dao/FeedsDAO";
+import { DataPage } from "../entity/DataPage";
+import { Story } from "../entity/Story";
 
 export class StatusService {
   private daoFactory: DAOFactory;
@@ -33,11 +35,36 @@ export class StatusService {
     pageSize: number,
     lastItem: StatusDto | null
   ): Promise<[StatusDto[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeDataService.getFakeDataStatuses(pageSize, lastItem);
+    return await this.loadMoreStatusItems(
+      (fh, ps, lt) => this.feedsDAO.getPageOfFeed(fh, ps, lt),
+      authToken,
+      userAlias,
+      pageSize,
+      lastItem
+    );
   }
 
   public async loadMoreStoryItems(
+    authToken: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: StatusDto | null
+  ): Promise<[StatusDto[], boolean]> {
+    return await this.loadMoreStatusItems(
+      (fh, ps, lt) => this.storiesDAO.getPageOfStories(fh, ps, lt),
+      authToken,
+      userAlias,
+      pageSize,
+      lastItem
+    );
+  }
+
+  private async loadMoreStatusItems(
+    pageOperation: (
+      followerHandle: string,
+      pageSize: number,
+      lastTimestamp: number | undefined
+    ) => Promise<DataPage<Story>>,
     authToken: string,
     userAlias: string,
     pageSize: number,
@@ -47,15 +74,15 @@ export class StatusService {
     await VerifyTokenService.verifyToken(this.sessionsDAO, authToken);
 
     //Get page of Stories
-    const stories = await this.storiesDAO.getPageOfStories(
+    const statuses = await pageOperation(
       userAlias,
       pageSize,
       lastItem ? lastItem.timestamp : undefined
     );
 
     //Convert Stories to StatusDtos
-    const storyItems = await Promise.all(
-      stories.values.map(async (Story) => {
+    const statusItems = await Promise.all(
+      statuses.values.map(async (Story) => {
         const [user] = await UserService.getUserDetails(
           this.usersDAO,
           Story.alias
@@ -64,7 +91,7 @@ export class StatusService {
       })
     );
 
-    return [storyItems, stories.hasMorePages];
+    return [statusItems, statuses.hasMorePages];
   }
 
   public async postStatus(
