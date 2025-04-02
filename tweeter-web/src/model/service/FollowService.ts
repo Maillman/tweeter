@@ -83,7 +83,7 @@ export class FollowService {
     authToken: AuthToken,
     userToUnfollow: User
   ): Promise<[followerCount: number, followeeCount: number]> {
-    return this.serverFacade.follow({
+    return this.serverFacade.unfollow({
       token: authToken.token,
       item: userToUnfollow.dto,
     });

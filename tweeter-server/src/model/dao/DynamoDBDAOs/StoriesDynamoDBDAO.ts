@@ -43,6 +43,7 @@ export class StoriesDynamoDBDAO implements StoriesDAO {
       },
       TableName: this.tableName,
       Limit: pageSize,
+      ScanIndexForward: false,
       ExclusiveStartKey:
         lastTimestamp === undefined
           ? undefined

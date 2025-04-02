@@ -45,6 +45,7 @@ export class FeedsDynamoDBDAO implements FeedsDAO {
       },
       TableName: this.tableName,
       Limit: pageSize,
+      ScanIndexForward: false,
       ExclusiveStartKey:
         lastTimestamp === undefined
           ? undefined

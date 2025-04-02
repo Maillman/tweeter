@@ -162,10 +162,15 @@ export class ServerFacade {
     response: FollowResponse
   ): [followerCount: number, followeeCount: number] {
     return this.handleResponse(response, () => {
-      if (response.followerCount && response.followeeCount) {
+      if (
+        response.followerCount !== undefined &&
+        response.followeeCount !== undefined
+      ) {
         return [response.followerCount, response.followeeCount];
       } else {
-        throw new Error(`Unable to retrieve follower or followee count`);
+        throw new Error(
+          `Unable to retrieve follower or followee count from following`
+        );
       }
     });
   }
