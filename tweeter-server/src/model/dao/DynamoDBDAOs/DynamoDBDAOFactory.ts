@@ -1,9 +1,11 @@
 import { DAOFactory } from "../DAOFactory";
+import { FeedsDAO } from "../FeedsDAO";
 import { FollowsDAO } from "../FollowsDAO";
 import { ImageDAO } from "../ImageDAO";
 import { SessionsDAO } from "../SessionsDAO";
 import { StoriesDAO } from "../StoriesDAO";
 import { UsersDAO } from "../UsersDAO";
+import { FeedsDynamoDBDAO } from "./FeedsDynamoDBDAO";
 import { FollowsDynamoDBDAO } from "./FollowsDynamoDBDAO";
 import { ImageS3DAO } from "./ImageS3DAO";
 import { SessionsDynamoDBDAO } from "./SessionsDynamoDBDAO";
@@ -22,6 +24,9 @@ export class DynamoDBDAOFactory implements DAOFactory {
   }
   getStoriesDAO(): StoriesDAO {
     return new StoriesDynamoDBDAO();
+  }
+  getFeedsDAO(): FeedsDAO {
+    return new FeedsDynamoDBDAO();
   }
   //Because S3 and DynamoDB are closely related, I'm grouping the S3DAO here too.
   getImageDAO(): ImageDAO {

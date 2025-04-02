@@ -1,4 +1,4 @@
-import { Status, FakeData, StatusDto } from "tweeter-shared";
+import { Status, FakeData, StatusDto, UserDto } from "tweeter-shared";
 import { FakeDataService } from "./FakeDataService";
 import { DAOFactory } from "../dao/DAOFactory";
 import { FollowsDAO } from "../dao/FollowsDAO";
@@ -7,6 +7,8 @@ import { UsersDAO } from "../dao/UsersDAO";
 import { StoriesDAO } from "../dao/StoriesDAO";
 import { VerifyTokenService } from "./VerifyTokenService";
 import { UserService } from "./UserService";
+import { FollowService } from "./FollowService";
+import { FeedsDAO } from "../dao/FeedsDAO";
 
 export class StatusService {
   private daoFactory: DAOFactory;
@@ -14,6 +16,7 @@ export class StatusService {
   private usersDAO: UsersDAO;
   private sessionsDAO: SessionsDAO;
   private storiesDAO: StoriesDAO;
+  private feedsDAO: FeedsDAO;
 
   constructor(daoFactory: DAOFactory) {
     this.daoFactory = daoFactory;
@@ -21,6 +24,7 @@ export class StatusService {
     this.usersDAO = daoFactory.getUsersDAO();
     this.sessionsDAO = daoFactory.getSessionsDAO();
     this.storiesDAO = daoFactory.getStoriesDAO();
+    this.feedsDAO = daoFactory.getFeedsDAO();
   }
 
   public async loadMoreFeedItems(
@@ -70,10 +74,46 @@ export class StatusService {
     //Verify the token and update!
     await VerifyTokenService.verifyToken(this.sessionsDAO, authToken);
 
+    //Get the user alias
+    const userAlias = await this.sessionsDAO.getUserHandle(authToken);
+    if (userAlias === undefined) {
+      throw new Error(
+        "[Server Error] Something went wrong retrieving your information"
+      );
+    }
+    if (userAlias !== newStatus.user.alias) {
+      throw new Error("[Bad Request] You cannot post as another user");
+    }
+
     //Post status to story
     await this.storiesDAO.putStory(newStatus);
 
     //Post status to feeds of all users following user
-    //TODO: Add this functionality!
+    let allFollowers: UserDto[] = [];
+    let lastFollower: UserDto | null = null;
+    let hasMore = true;
+    do {
+      const [loadMoreFollowers, hasMoreFollowers] =
+        await FollowService.loadMoreFollows(
+          this.sessionsDAO,
+          this.usersDAO,
+          (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
+          false,
+          authToken,
+          userAlias,
+          25,
+          null
+        );
+      console.log(loadMoreFollowers, hasMoreFollowers);
+      allFollowers = [...allFollowers, ...loadMoreFollowers];
+      const getLastFollower = allFollowers.at(-1);
+      lastFollower = getLastFollower === undefined ? null : getLastFollower;
+      hasMore = hasMoreFollowers;
+    } while (hasMore);
+    //Send the post to the feed of all the followers
+    console.log(allFollowers);
+    for (let follower of allFollowers) {
+      await this.feedsDAO.putFeed(follower.alias, newStatus);
+    }
   }
 }

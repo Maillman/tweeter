@@ -1,3 +1,4 @@
+import { FeedsDAO } from "./FeedsDAO";
 import { FollowsDAO } from "./FollowsDAO";
 import { ImageDAO } from "./ImageDAO";
 import { SessionsDAO } from "./SessionsDAO";
@@ -9,5 +10,6 @@ export interface DAOFactory {
   getFollowsDAO(): FollowsDAO;
   getSessionsDAO(): SessionsDAO;
   getStoriesDAO(): StoriesDAO;
+  getFeedsDAO(): FeedsDAO;
   getImageDAO(): ImageDAO;
 }

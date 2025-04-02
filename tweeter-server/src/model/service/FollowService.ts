@@ -28,7 +28,9 @@ export class FollowService {
     pageSize: number,
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
-    return await this.loadMoreFollows(
+    return await FollowService.loadMoreFollows(
+      this.sessionsDAO,
+      this.usersDAO,
       (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
       false,
       token,
@@ -44,7 +46,9 @@ export class FollowService {
     pageSize: number,
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
-    return await this.loadMoreFollows(
+    return await FollowService.loadMoreFollows(
+      this.sessionsDAO,
+      this.usersDAO,
       (fh, lfh, ps) => this.followsDAO.getPageOfFollowees(fh, lfh, ps),
       true,
       token,
@@ -54,7 +58,9 @@ export class FollowService {
     );
   }
 
-  private async loadMoreFollows(
+  public static async loadMoreFollows(
+    sessionsDAO: SessionsDAO,
+    usersDAO: UsersDAO,
     pageOperation: (
       followerHandle: string,
       lastFolloweeHandle: string | undefined,
@@ -67,7 +73,7 @@ export class FollowService {
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
     //Verify the token and update!
-    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+    await VerifyTokenService.verifyToken(sessionsDAO, token);
 
     const pageOfFollows = await pageOperation(
       userAlias,
@@ -81,7 +87,7 @@ export class FollowService {
     const userDtos: UserDto[] = await Promise.all(
       pageOfFollows.values.map(async (Follow) => {
         const [user] = await UserService.getUserDetails(
-          this.usersDAO,
+          usersDAO,
           getFollowees ? Follow.followeeHandle : Follow.followerHandle
         );
         return user.dto;
