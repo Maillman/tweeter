@@ -1,3 +1,5 @@
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { DAOFactory } from "../DAOFactory";
 import { FeedsDAO } from "../FeedsDAO";
 import { FollowsDAO } from "../FollowsDAO";
@@ -13,20 +15,21 @@ import { StoriesDynamoDBDAO } from "./StoriesDynamoDBDAO";
 import { UsersDynamoDBDAO } from "./UsersDynamoDBDAO";
 
 export class DynamoDBDAOFactory implements DAOFactory {
+  private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
   getUsersDAO(): UsersDAO {
-    return new UsersDynamoDBDAO();
+    return new UsersDynamoDBDAO(this.client);
   }
   getFollowsDAO(): FollowsDAO {
-    return new FollowsDynamoDBDAO();
+    return new FollowsDynamoDBDAO(this.client);
   }
   getSessionsDAO(): SessionsDAO {
-    return new SessionsDynamoDBDAO();
+    return new SessionsDynamoDBDAO(this.client);
   }
   getStoriesDAO(): StoriesDAO {
-    return new StoriesDynamoDBDAO();
+    return new StoriesDynamoDBDAO(this.client);
   }
   getFeedsDAO(): FeedsDAO {
-    return new FeedsDynamoDBDAO();
+    return new FeedsDynamoDBDAO(this.client);
   }
   //Because S3 and DynamoDB are closely related, I'm grouping the S3DAO here too.
   getImageDAO(): ImageDAO {

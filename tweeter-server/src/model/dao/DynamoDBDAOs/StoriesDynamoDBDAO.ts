@@ -18,7 +18,11 @@ export class StoriesDynamoDBDAO implements StoriesDAO {
   readonly statusTimestampAttr = "status_timestamp";
   readonly postAttr = "post";
 
-  private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
+  private readonly client;
+
+  constructor(client: DynamoDBDocumentClient) {
+    this.client = client;
+  }
 
   async putStory(status: StatusDto): Promise<void> {
     const params = {

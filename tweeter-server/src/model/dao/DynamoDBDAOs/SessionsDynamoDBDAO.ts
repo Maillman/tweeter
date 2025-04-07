@@ -16,7 +16,11 @@ export class SessionsDynamoDBDAO implements SessionsDAO {
   readonly timestampAttr = "token_timestamp";
   readonly handleAttr = "handle";
 
-  private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
+  private readonly client;
+
+  constructor(client: DynamoDBDocumentClient) {
+    this.client = client;
+  }
 
   async putAuthToken(
     token: string,

@@ -20,7 +20,11 @@ export class UsersDynamoDBDAO implements UsersDAO {
   readonly followerCountAttr = "follower_count";
   readonly followeeCountAttr = "followee_count";
 
-  private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
+  private readonly client;
+
+  constructor(client: DynamoDBDocumentClient) {
+    this.client = client;
+  }
 
   async putUser(
     user: User,

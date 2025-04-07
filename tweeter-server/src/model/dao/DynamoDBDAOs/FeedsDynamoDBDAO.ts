@@ -19,7 +19,11 @@ export class FeedsDynamoDBDAO implements FeedsDAO {
   readonly authorHandleAttr = "author_handle";
   readonly postAttr = "post";
 
-  private readonly client = DynamoDBDocumentClient.from(new DynamoDBClient());
+  private readonly client;
+
+  constructor(client: DynamoDBDocumentClient) {
+    this.client = client;
+  }
 
   async putFeed(handle: string, status: StatusDto): Promise<void> {
     const params = {
