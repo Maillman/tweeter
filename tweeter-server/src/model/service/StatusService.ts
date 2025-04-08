@@ -115,32 +115,31 @@ export class StatusService {
     //Post status to story
     await this.storiesDAO.putStory(newStatus);
 
-    //Post status to feeds of all users following user
-    let allFollowers: UserDto[] = [];
-    let lastFollower: UserDto | null = null;
-    let hasMore = true;
-    do {
-      const [loadMoreFollowers, hasMoreFollowers] =
-        await FollowService.loadMoreFollows(
-          this.sessionsDAO,
-          this.usersDAO,
-          (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
-          false,
-          authToken,
-          userAlias,
-          25,
-          null
-        );
-      console.log(loadMoreFollowers, hasMoreFollowers);
-      allFollowers = [...allFollowers, ...loadMoreFollowers];
-      const getLastFollower = allFollowers.at(-1);
-      lastFollower = getLastFollower === undefined ? null : getLastFollower;
-      hasMore = hasMoreFollowers;
-    } while (hasMore);
-    //Send the post to the feed of all the followers
-    console.log(allFollowers);
-    for (let follower of allFollowers) {
-      await this.feedsDAO.putFeed(follower.alias, newStatus);
-    }
+    //Post status to feeds of all users following user -> FollowFetcherLambda
+    //FIXME: remove this once ready to move onto the   -> FollowFetcherLambda
+    // let allFollowers: UserDto[] = [];
+    // let lastFollower: UserDto | null = null;
+    // let hasMore = true;
+    // do {
+    //   const [loadMoreFollowers, hasMoreFollowers] =
+    //     await FollowService.loadMoreFollows(
+    //       this.usersDAO,
+    //       (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
+    //       false,
+    //       userAlias,
+    //       25,
+    //       lastFollower
+    //     );
+    //   console.log(loadMoreFollowers, hasMoreFollowers);
+    //   allFollowers = [...allFollowers, ...loadMoreFollowers];
+    //   const getLastFollower = allFollowers.at(-1);
+    //   lastFollower = getLastFollower === undefined ? null : getLastFollower;
+    //   hasMore = hasMoreFollowers;
+    // } while (hasMore);
+    // //Send the post to the feed of all the followers -> JobHandlerLambda
+    // console.log(allFollowers);
+    // for (let follower of allFollowers) {
+    //   await this.feedsDAO.putFeed(follower.alias, newStatus);
+    // }
   }
 }

@@ -8,6 +8,7 @@ import { Follow } from "../entity/Follow";
 import { UserService } from "./UserService";
 import { DataPage } from "../entity/DataPage";
 import { UsersDAO } from "../dao/UsersDAO";
+import { Story } from "../entity/Story";
 
 export class FollowService {
   private daoFactory: DAOFactory;
@@ -28,12 +29,13 @@ export class FollowService {
     pageSize: number,
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+
     return await FollowService.loadMoreFollows(
-      this.sessionsDAO,
       this.usersDAO,
       (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
       false,
-      token,
       userAlias,
       pageSize,
       lastItem
@@ -46,12 +48,13 @@ export class FollowService {
     pageSize: number,
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
+    //Verify the token and update!
+    await VerifyTokenService.verifyToken(this.sessionsDAO, token);
+
     return await FollowService.loadMoreFollows(
-      this.sessionsDAO,
       this.usersDAO,
       (fh, lfh, ps) => this.followsDAO.getPageOfFollowees(fh, lfh, ps),
       true,
-      token,
       userAlias,
       pageSize,
       lastItem
@@ -59,7 +62,6 @@ export class FollowService {
   }
 
   public static async loadMoreFollows(
-    sessionsDAO: SessionsDAO,
     usersDAO: UsersDAO,
     pageOperation: (
       followerHandle: string,
@@ -67,14 +69,10 @@ export class FollowService {
       pageSize: number
     ) => Promise<DataPage<Follow>>,
     getFollowees: boolean,
-    token: string,
     userAlias: string,
     pageSize: number,
     lastItem: UserDto | null
   ): Promise<[UserDto[], boolean]> {
-    //Verify the token and update!
-    await VerifyTokenService.verifyToken(sessionsDAO, token);
-
     const pageOfFollows = await pageOperation(
       userAlias,
       lastItem ? lastItem.alias : undefined,
@@ -206,5 +204,32 @@ export class FollowService {
     );
 
     return [followerCount, followeeCount];
+  }
+  public async getNumberOfFollowers(
+    userAlias: string,
+    numberOfFollowers: number,
+    lastFollower: UserDto | null
+  ): Promise<[UserDto[], boolean]> {
+    console.log(userAlias, numberOfFollowers, lastFollower);
+    //Post status to feeds of all users following user
+    let allFollowers: UserDto[] = [];
+    let hasMore = true;
+    do {
+      const [loadMoreFollowers, hasMoreFollowers] =
+        await FollowService.loadMoreFollows(
+          this.usersDAO,
+          (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
+          false,
+          userAlias,
+          25,
+          lastFollower
+        );
+      console.log(loadMoreFollowers, hasMoreFollowers);
+      allFollowers = [...allFollowers, ...loadMoreFollowers];
+      const getLastFollower = allFollowers.at(-1);
+      lastFollower = getLastFollower === undefined ? null : getLastFollower;
+      hasMore = hasMoreFollowers;
+    } while (hasMore && allFollowers.length < numberOfFollowers);
+    return [allFollowers, hasMore];
   }
 }
