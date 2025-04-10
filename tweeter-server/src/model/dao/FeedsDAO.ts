@@ -4,7 +4,7 @@ import { Story } from "../entity/Story";
 
 export interface FeedsDAO {
   putFeed(handle: string, status: StatusDto): Promise<void>;
-  batchPutFeed(users: UserDto[], status: StatusDto): Promise<void>;
+  batchPutFeed(userHandles: string[], status: StatusDto): Promise<void>;
   getPageOfFeed(
     userAlias: string,
     pageSize: number,

@@ -40,10 +40,10 @@ export class FeedsDynamoDBDAO implements FeedsDAO {
     };
     await this.client.send(new PutCommand(params));
   }
-  async batchPutFeed(users: UserDto[], status: StatusDto): Promise<void> {
+  async batchPutFeed(userHandles: string[], status: StatusDto): Promise<void> {
     const params = {
       RequestItems: {
-        [this.tableName]: this.createPutFeedRequestItems(users, status),
+        [this.tableName]: this.createPutFeedRequestItems(userHandles, status),
       },
     };
     try {
@@ -56,12 +56,14 @@ export class FeedsDynamoDBDAO implements FeedsDAO {
       );
     }
   }
-  private createPutFeedRequestItems(users: UserDto[], status: StatusDto) {
-    return users.map((user) => this.createPutFeedRequest(user, status));
+  private createPutFeedRequestItems(userHandles: string[], status: StatusDto) {
+    return userHandles.map((userHandle) =>
+      this.createPutFeedRequest(userHandle, status)
+    );
   }
-  private createPutFeedRequest(user: UserDto, status: StatusDto) {
+  private createPutFeedRequest(userHandle: string, status: StatusDto) {
     const item = {
-      [this.handleAttr]: user.alias,
+      [this.handleAttr]: userHandle,
       [this.statusTimestampAttr]: status.timestamp,
       [this.postAttr]: status.post,
       [this.authorHandleAttr]: status.user.alias,

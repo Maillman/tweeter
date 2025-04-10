@@ -33,10 +33,15 @@ export const handler = async function (event: any) {
     const status: StatusDto = JSON.parse(body);
     const userAlias: string = status.user.alias;
     let hasMoreFollowers = true;
+    let lastFollower: string | undefined = undefined;
     do {
       const [numberOfFollowers, hasMore] = await new FollowService(
         new DynamoDBDAOFactory()
-      ).getNumberOfFollowers(userAlias, 100, null);
+      ).getNumberOfFollowers(
+        userAlias,
+        100,
+        lastFollower === undefined ? null : lastFollower
+      );
       const body = {
         status: status,
         numberOfFollowers: numberOfFollowers,
@@ -44,6 +49,7 @@ export const handler = async function (event: any) {
       const jsonItem = JSON.stringify(body);
       await sendMessage(jsonItem);
       hasMoreFollowers = hasMore;
+      lastFollower = numberOfFollowers.at(-1);
     } while (hasMoreFollowers);
   }
 };

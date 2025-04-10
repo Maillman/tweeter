@@ -144,13 +144,13 @@ export class StatusService {
   }
   public async batchPostStatus(
     status: StatusDto,
-    numberOfFollowers: UserDto[]
+    numberOfFollowers: string[]
   ): Promise<void> {
     console.log(numberOfFollowers, status);
     //Split the numberOfFollowers into slots of 25 and batch write to the 25.
     const chunkSize = 25;
     for (let i = 0; i < numberOfFollowers.length; i += chunkSize) {
-      const chunkedFollowers: UserDto[] = numberOfFollowers.slice(
+      const chunkedFollowers: string[] = numberOfFollowers.slice(
         i,
         i + chunkSize
       );

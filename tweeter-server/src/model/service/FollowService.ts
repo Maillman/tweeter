@@ -208,25 +208,31 @@ export class FollowService {
   public async getNumberOfFollowers(
     userAlias: string,
     numberOfFollowers: number,
-    lastFollower: UserDto | null
-  ): Promise<[UserDto[], boolean]> {
+    lastFollower: string | null
+  ): Promise<[string[], boolean]> {
     console.log(userAlias, numberOfFollowers, lastFollower);
     //Post status to feeds of all users following user
-    let allFollowers: UserDto[] = [];
+    let allFollowers: string[] = [];
     let hasMore = true;
     do {
-      const [loadMoreFollowers, hasMoreFollowers] =
-        await FollowService.loadMoreFollows(
-          this.usersDAO,
-          (fh, lfh, ps) => this.followsDAO.getPageOfFollowers(fh, lfh, ps),
-          false,
-          userAlias,
-          25,
-          lastFollower
-        );
-      console.log(loadMoreFollowers, hasMoreFollowers);
-      allFollowers = [...allFollowers, ...loadMoreFollowers];
+      const getPageOfFollowers = await this.followsDAO.getPageOfFollowers(
+        userAlias,
+        lastFollower === null ? undefined : lastFollower,
+        25
+      );
+      const userAliases: string[] = getPageOfFollowers.values.map(
+        (follow) => follow.followerHandle
+      );
+      const hasMoreFollowers = getPageOfFollowers.hasMorePages;
+      console.log("In getNumberOfFollowers", userAlias, hasMoreFollowers);
+      allFollowers = [...allFollowers, ...userAliases];
       const getLastFollower = allFollowers.at(-1);
+      console.log(
+        userAlias,
+        hasMoreFollowers,
+        "the last follower:",
+        getLastFollower
+      );
       lastFollower = getLastFollower === undefined ? null : getLastFollower;
       hasMore = hasMoreFollowers;
     } while (hasMore && allFollowers.length < numberOfFollowers);
